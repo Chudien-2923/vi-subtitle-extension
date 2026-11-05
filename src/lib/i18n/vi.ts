@@ -10,8 +10,8 @@ export const ERROR_TEXT: Record<ErrorCode, string> = {
   'rate-limit': 'Nhà cung cấp đang giới hạn tốc độ, sẽ tự thử lại.',
   server: 'Máy chủ nhà cung cấp đang lỗi, sẽ tự thử lại.',
   network: 'Không kết nối được tới nhà cung cấp. Kiểm tra mạng.',
-  'local-offline':
-    'Chưa kết nối được chương trình trên máy (cầu nối Oh My Pi hoặc Ollama). Hãy bật nó rồi tải lại video.',
+  'local-offline': 'Chưa kết nối được Ollama trên máy. Hãy bật Ollama rồi tải lại video.',
+  'helper-missing': 'Chưa cài trợ lý Oh My Pi trên máy (chỉ cần cài một lần). Mở Cài đặt → Oh My Pi để xem hướng dẫn.',
   'bad-output': 'Model trả kết quả không đúng định dạng.',
   aborted: 'Đã dừng dịch.',
 };

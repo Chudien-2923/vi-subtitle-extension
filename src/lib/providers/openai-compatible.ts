@@ -3,26 +3,25 @@ import { ProviderError } from './errors';
 import { requestJson } from './http';
 import type { CompletionRequest, LlmClient } from './types';
 
-/** Chat Completions API with `json_schema` output; used by OpenAI, OpenRouter and the Oh My Pi bridge. */
-export function createChatCompletionsClient(options: {
-  baseUrl: string;
-  /** Omitted for the local Oh My Pi bridge, which uses the accounts logged in on the machine. */
-  apiKey?: string;
-  model: string;
-  extraHeaders?: Record<string, string>;
-}): LlmClient {
-  const headers = {
-    ...(options.apiKey ? { authorization: `Bearer ${options.apiKey}` } : {}),
-    ...options.extraHeaders,
-  };
+/** `path` is relative to the API root, e.g. `/chat/completions`; resolves to the parsed JSON body. */
+export type JsonTransport = (
+  path: string,
+  init: { method: 'GET' | 'POST'; body?: unknown; signal?: AbortSignal },
+) => Promise<unknown>;
+
+export function httpTransport(baseUrl: string, headers: Record<string, string>): JsonTransport {
+  return (path, init) => requestJson(`${baseUrl}${path}`, { ...init, headers });
+}
+
+/** Chat Completions API with `json_schema` output; used by OpenAI, OpenRouter and the Oh My Pi helper. */
+export function createChatCompletionsClient(transport: JsonTransport, model: string): LlmClient {
   return {
     async complete(request: CompletionRequest) {
-      const data = await requestJson(`${options.baseUrl}/chat/completions`, {
+      const data = await transport('/chat/completions', {
         method: 'POST',
-        headers,
         signal: request.signal,
         body: {
-          model: options.model,
+          model,
           messages: [
             { role: 'system', content: request.system },
             { role: 'user', content: request.user },
@@ -45,7 +44,7 @@ export function createChatCompletionsClient(options: {
       return content;
     },
     async listModels(signal) {
-      const data = await requestJson(`${options.baseUrl}/models`, { method: 'GET', headers, signal });
+      const data = await transport('/models', { method: 'GET', signal });
       const models = isRecord(data) && Array.isArray(data.data) ? data.data : [];
       return models.flatMap((m) => (isRecord(m) && typeof m.id === 'string' ? [m.id] : [])).sort();
     },

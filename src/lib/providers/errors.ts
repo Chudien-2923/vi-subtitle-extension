@@ -8,6 +8,7 @@ export type ErrorCode =
   | 'server'
   | 'network'
   | 'local-offline'
+  | 'helper-missing'
   | 'bad-output'
   | 'aborted';
 
@@ -20,6 +21,7 @@ export const IS_FATAL: Record<ErrorCode, boolean> = {
   quota: true,
   aborted: true,
   'local-offline': true,
+  'helper-missing': true,
   'rate-limit': false,
   server: false,
   network: false,

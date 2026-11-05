@@ -42,7 +42,7 @@ async function waitForPlayer(timeoutMs: number): Promise<{ player: HTMLElement; 
 
 /** Settings that change translated output; changing them restarts the session. */
 const translationSettingsKey = (s: Settings) =>
-  JSON.stringify([s.enabled, s.provider, s.models[s.provider], s.localUrls, s.reviewPass, s.concurrency]);
+  JSON.stringify([s.enabled, s.provider, s.models[s.provider], s.ollamaUrl, s.reviewPass, s.concurrency]);
 
 /** One video: captions → overlay → background translation session. */
 class VideoSession {

@@ -36,11 +36,12 @@
 
 ### 0.2 Lịch sử version
 
-| Version | Ngày       | Trạng thái | Thay đổi                                                                                                                                                                              |
-| ------- | ---------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `0.0.0` | 2026-11-05 | Planning   | Khởi tạo repo, PRD, `IMPLEMENTATION_PLAN.md`. Chốt phạm vi v0.1.0, tên hiển thị **CHUDIN VI SUBTITLE**, icon (`branding/icon.svg`), phát hành chỉ qua GitHub Releases.                |
-| `0.0.0` | 2026-11-05 | Dev        | (nhắm `0.1.0`) FR-3.2/FR-4: phụ đề tự động do model tự chia câu theo chỉ số từ (giữ mốc thời gian từng từ), heuristic chỉ còn là hiển thị tạm + fallback. Code MVP Phase 1–9.         |
-| `0.0.0` | 2026-11-05 | Dev        | (nhắm `0.1.0`) Thêm nhà cung cấp **Oh My Pi**: dùng tài khoản đã đăng nhập trong `omp` qua cầu nối `bridge/omp-bridge.mjs` (localhost → `omp auth-gateway stdio`), không cần API key. |
+| Version | Ngày       | Trạng thái | Thay đổi                                                                                                                                                                                                                                                                                                                                         |
+| ------- | ---------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `0.0.0` | 2026-11-05 | Planning   | Khởi tạo repo, PRD, `IMPLEMENTATION_PLAN.md`. Chốt phạm vi v0.1.0, tên hiển thị **CHUDIN VI SUBTITLE**, icon (`branding/icon.svg`), phát hành chỉ qua GitHub Releases.                                                                                                                                                                           |
+| `0.0.0` | 2026-11-05 | Dev        | (nhắm `0.1.0`) FR-3.2/FR-4: phụ đề tự động do model tự chia câu theo chỉ số từ (giữ mốc thời gian từng từ), heuristic chỉ còn là hiển thị tạm + fallback. Code MVP Phase 1–9.                                                                                                                                                                    |
+| `0.0.0` | 2026-11-05 | Dev        | (nhắm `0.1.0`) Thêm nhà cung cấp **Oh My Pi**: dùng tài khoản đã đăng nhập trong `omp` qua cầu nối `bridge/omp-bridge.mjs` (localhost → `omp auth-gateway stdio`), không cần API key.                                                                                                                                                            |
+| `0.0.0` | 2026-11-05 | Dev        | (nhắm `0.1.0`) Theo phản hồi "không ai nhớ lệnh chạy cầu nối": thay cầu nối HTTP bằng **trợ lý native messaging** (`bridge/omp-host.mjs`, cài một lần bằng `bridge/install.sh`, Chrome tự khởi động). Thêm `key` vào manifest để cố định ID extension `keljgahambkoccggkjpmklhomjnlagph`. Tắt song ngữ → không hiện EN kể cả khi chưa dịch xong. |
 
 ### 0.3 Roadmap version
 
@@ -81,15 +82,15 @@ Tiêu chí "dịch tốt" (đúc kết từ việc dịch 32 video Critical Thin
 
 ### 1.4 Phạm vi v0.1.0 (đã chốt 2026-11-05)
 
-| Quyết định                          | Lựa chọn                                                                                                                                                                                         |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Site                                | **Chỉ YouTube** (`www.youtube.com/watch`, gồm cả điều hướng SPA)                                                                                                                                 |
-| Engine dịch                         | **Nhiều provider**: Gemini (gợi ý mặc định, có free tier), OpenAI, Anthropic Claude, OpenRouter (API key); **Oh My Pi** (tài khoản đã đăng nhập trên máy, qua cầu nối localhost); Ollama (local) |
-| Video không có phụ đề EN            | **Bỏ qua**, hiển thị thông báo rõ ràng                                                                                                                                                           |
-| Hiển thị mặc định                   | **Song ngữ**: VI to ở trên + EN nhỏ hiện dần theo cụm ở dưới                                                                                                                                     |
-| Lượt biên tập đối chiếu (LLM lần 2) | **Tắt mặc định**, có tùy chọn bật                                                                                                                                                                |
-| Tên hiển thị                        | **CHUDIN VI SUBTITLE**                                                                                                                                                                           |
-| Phát hành                           | **Chỉ GitHub Releases** (zip + Load unpacked)                                                                                                                                                    |
+| Quyết định                          | Lựa chọn                                                                                                                                                                                               |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Site                                | **Chỉ YouTube** (`www.youtube.com/watch`, gồm cả điều hướng SPA)                                                                                                                                       |
+| Engine dịch                         | **Nhiều provider**: Gemini (gợi ý mặc định, có free tier), OpenAI, Anthropic Claude, OpenRouter (API key); **Oh My Pi** (tài khoản đã đăng nhập trên máy, qua trợ lý native messaging); Ollama (local) |
+| Video không có phụ đề EN            | **Bỏ qua**, hiển thị thông báo rõ ràng                                                                                                                                                                 |
+| Hiển thị mặc định                   | **Song ngữ**: VI to ở trên + EN nhỏ hiện dần theo cụm ở dưới                                                                                                                                           |
+| Lượt biên tập đối chiếu (LLM lần 2) | **Tắt mặc định**, có tùy chọn bật                                                                                                                                                                      |
+| Tên hiển thị                        | **CHUDIN VI SUBTITLE**                                                                                                                                                                                 |
+| Phát hành                           | **Chỉ GitHub Releases** (zip + Load unpacked)                                                                                                                                                          |
 
 ### 1.5 Ngoài phạm vi v0.1.0
 
@@ -142,10 +143,10 @@ Tiêu chí "dịch tốt" (đúc kết từ việc dịch 32 video Critical Thin
 #### FR-5 Provider (BYOK)
 
 - FR-5.1 Interface chung `LlmClient` cho: Gemini, OpenAI, Anthropic, OpenRouter, Oh My Pi, Ollama.
-- FR-5.2 Người dùng chọn provider, model (+ tải danh sách), nhập API key; provider trên máy (Oh My Pi, Ollama) nhập địa chỉ localhost; nút "Kiểm tra kết nối".
+- FR-5.2 Người dùng chọn provider, model (+ tải danh sách), nhập API key; Ollama nhập địa chỉ localhost; Oh My Pi hiện trạng thái trợ lý (tự kiểm tra lại mỗi 4 giây khi chưa sẵn sàng) + lệnh cài một lần có nút sao chép; nút "Kiểm tra kết nối".
 - FR-5.3 Gọi API từ background service worker; key không bao giờ đưa vào content script / trang YouTube.
-- FR-5.4 Lỗi chuẩn hóa: `missing-key`, `invalid-key`, `permission`, `bad-model`, `quota`, `rate-limit` (backoff), `server`, `network`, `local-offline` (provider trên máy không chạy → dừng ngay, báo bật nó), `bad-output`.
-- FR-5.5 Oh My Pi: `bridge/omp-bridge.mjs` (Node/Bun, không dependency) mở `http://127.0.0.1:11435` dạng OpenAI-compatible (`/v1/models`, `/v1/chat/completions`), chuyển tiếp qua `omp auth-gateway stdio` dùng tài khoản đã `omp login`. Chỉ phục vụ origin `chrome-extension://` (hoặc không có Origin); từ chối origin web.
+- FR-5.4 Lỗi chuẩn hóa: `missing-key`, `invalid-key`, `permission`, `bad-model`, `quota`, `rate-limit` (backoff), `server`, `network`, `local-offline` (Ollama không chạy), `helper-missing` (chưa cài trợ lý Oh My Pi hoặc trợ lý không chạy được `omp`) — hai lỗi này dừng ngay và chỉ cách sửa, `bad-output`.
+- FR-5.5 Oh My Pi: native messaging host `com.chudin.vi_subtitle` (`bridge/omp-host.mjs`, Node/Bun, không dependency). `bridge/install.sh` (macOS/Linux, `curl … | sh`) chép host vào `~/.chudin-vi-subtitle/`, tạo wrapper ghim đường dẫn tuyệt đối tới runtime và `omp` (Chrome khởi động host với PATH tối thiểu), ghi host manifest cho mọi trình duyệt Chromium tìm thấy với `allowed_origins` = ID cố định + ID trang Cài đặt truyền vào. Chrome tự khởi động host khi extension cần; extension đóng port sau 60 giây rảnh. Host chuyển tiếp `{id, path, method, body}` tới `omp auth-gateway stdio` (API dạng OpenAI: `/v1/models`, `/v1/chat/completions`), `/health` trả version omp. Không mở cổng mạng nào.
 
 #### FR-6 Cache
 
@@ -179,7 +180,7 @@ Tiêu chí "dịch tốt" (đúc kết từ việc dịch 32 video Critical Thin
 ### 1.8 Yêu cầu phi chức năng (NFR)
 
 - **Quyền riêng tư**: API key chỉ lưu `chrome.storage.local`; không telemetry, không server trung gian; chỉ gửi transcript tới provider người dùng chọn.
-- **Quyền (permissions) tối thiểu**: `storage`; host `*://www.youtube.com/*`; host của provider xin theo kiểu `optional_host_permissions` khi người dùng chọn provider.
+- **Quyền (permissions) tối thiểu**: `storage`, `nativeMessaging` (bắt buộc khai báo: Chrome không kích hoạt được `nativeMessaging` dạng optional); host của provider xin theo kiểu `optional_host_permissions` khi người dùng bấm Lưu.
 - **Hiệu năng**: không làm giật video; overlay render theo `requestAnimationFrame`/`timeupdate` nhẹ; mục tiêu phụ đề VI đầu tiên xuất hiện ≤ ~10 giây sau khi bắt đầu xem (phụ thuộc provider).
 - **Chi phí**: mặc định 1 lượt LLM/cue; cache để không dịch lại.
 - **Bền vững với thay đổi DOM YouTube**: selector và điểm hook tập trung một module, có fallback.
@@ -217,13 +218,16 @@ src/ (WXT + TypeScript)
 └─ lib/
    ├─ captions/   # json3 → words/cues, phân đoạn heuristic
    ├─ translate/  # chunks (kế hoạch), prompt, validate, workers (cue/word mode), session (lập lịch), display
-   ├─ providers/  # gemini, openai-compatible (OpenAI/OpenRouter), anthropic, ollama, lỗi chuẩn hóa
+   ├─ providers/  # gemini, openai-compatible (OpenAI/OpenRouter/Oh My Pi), anthropic, ollama, native (trợ lý Oh My Pi), lỗi chuẩn hóa
    ├─ cache/      # IndexedDB theo chunk
    ├─ overlay/    # timeline (cue đang hiện, cụm EN), style, overlay DOM (Shadow DOM)
    ├─ youtube/    # đọc player response, chọn track EN
    ├─ settings/   # schema + mặc định + storage
    ├─ i18n/       # chuỗi tiếng Việt
    └─ messaging.ts # giao thức MAIN↔ISOLATED (postMessage) và content↔background (Port)
+bridge/
+├─ install.sh                   # cài trợ lý Oh My Pi một lần (macOS/Linux): ghi host manifest cho các trình duyệt Chromium
+└─ omp-host.mjs                 # native messaging host: Chrome tự khởi động, chuyển tiếp tới `omp auth-gateway stdio`
 ```
 
 Luồng: MAIN lấy json3 → ISOLATED dựng `SourceText` + overlay (tiếng Anh hiện ngay) → mở Port gửi `start` → background đọc cache, dịch chunk theo thứ tự quanh playhead, gửi `chunk` payload → content dựng lại danh sách cue (`buildDisplay`) và hiển thị theo `video.currentTime`. Seek/heartbeat 10s gửi `playhead`.

@@ -116,15 +116,18 @@
 
 - [ ] "Kiểm tra kết nối" báo đúng với key hợp lệ / key sai cho từng provider có key thật để thử
 - [ ] Ollama chạy được với một model local
-- [x] Oh My Pi: dịch video thật trong Chrome qua cầu nối (chủ dự án xác nhận, video `kDq5GTckOVs`)
+- [x] Oh My Pi: dịch video thật trong Chrome qua cầu nối HTTP cũ (chủ dự án xác nhận, video `kDq5GTckOVs`)
+- [ ] Oh My Pi qua trợ lý native messaging: cài bằng lệnh trong Cài đặt → trạng thái ✓ → dịch video, không mở Terminal
 
 ### Oh My Pi (tài khoản trên máy, không cần API key)
 
-- [x] Cầu nối `bridge/omp-bridge.mjs` → `omp auth-gateway stdio`; `npm run omp-bridge`
-- [x] Chặn origin web (403), chỉ nhận `chrome-extension://` (smoke bằng curl)
-- [x] Provider `omp` trong extension (OpenAI-compatible, không key), địa chỉ localhost cấu hình được; `@smol` mặc định
-- [x] Provider trên máy không chạy → lỗi `local-offline` dừng ngay, thông báo rõ (unit test + smoke)
-- [x] Smoke thật ngoài Chrome: code pipeline của extension + cầu nối + `anthropic/claude-haiku-5-5` dịch trọn video TED-Ed 4,5 phút trong ~17 giây, 641/641 từ, 69/69 câu
+- [x] ~~Cầu nối HTTP `bridge/omp-bridge.mjs`~~ → thay bằng native messaging (phản hồi: người dùng không nhớ lệnh chạy)
+- [x] 🧪 Host `bridge/omp-host.mjs` (native messaging) → `omp auth-gateway stdio`; smoke giả lập Chrome (env PATH tối thiểu): `/health` → omp 18.16.0, 179 model, dịch bằng `anthropic/claude-haiku-5-5`, model sai → 404, route lạ → 404, đóng stdin → host thoát
+- [x] 🧪 `bridge/install.sh` (macOS/Linux): tìm node/bun + omp, ghi wrapper + host manifest cho các trình duyệt Chromium (smoke với HOME tạm)
+- [x] `key` trong manifest → ID cố định `keljgahambkoccggkjpmklhomjnlagph`
+- [x] 🧪 Cài đặt: trạng thái trợ lý, lệnh cài có nút sao chép, tự kiểm tra lại mỗi 4 giây
+- [x] Chưa cài trợ lý → lỗi `helper-missing` dừng ngay, chỉ tới Cài đặt (unit test transport); Ollama không chạy → `local-offline`
+- [x] Smoke thật ngoài Chrome (cầu nối HTTP cũ, cùng gateway): dịch trọn video TED-Ed 4,5 phút trong ~17 giây, 641/641 từ, 69/69 câu
 
 ---
 

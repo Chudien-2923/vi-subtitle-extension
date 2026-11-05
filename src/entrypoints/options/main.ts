@@ -4,14 +4,20 @@ import type { Cue, VideoMeta } from '../../lib/captions/types';
 import { ERROR_TEXT } from '../../lib/i18n/vi';
 import { renderLine } from '../../lib/overlay/overlay';
 import { SUBTITLE_CSS, subtitleVariables } from '../../lib/overlay/style';
-import { clientConfigFor, createClient, PROVIDER_INFO, requestProviderPermission } from '../../lib/providers';
+import {
+  clientConfigFor,
+  createClient,
+  ompInstallCommand,
+  PROVIDER_INFO,
+  requestProviderPermission,
+} from '../../lib/providers';
 import { toProviderError } from '../../lib/providers/errors';
+import { checkOmpHelper } from '../../lib/providers/native';
 import type { LlmClient } from '../../lib/providers/types';
 import {
   type Appearance,
   DEFAULT_SETTINGS,
   isLocalProvider,
-  type LocalProviderId,
   loadSecrets,
   loadSettings,
   PROVIDER_IDS,
@@ -62,12 +68,7 @@ let draftProvider: ProviderId;
 
 const keyInput = byId<HTMLInputElement>('api-key');
 const modelInput = byId<HTMLInputElement>('model');
-const localInput = byId<HTMLInputElement>('local-url');
-
-const LOCAL_LABEL: Record<LocalProviderId, string> = {
-  omp: 'Địa chỉ cầu nối Oh My Pi',
-  ollama: 'Địa chỉ Ollama',
-};
+const ollamaInput = byId<HTMLInputElement>('ollama-url');
 const providerResult = byId<HTMLParagraphElement>('provider-result');
 
 function showResult(text: string, tone: 'success' | 'error' | 'muted'): void {
@@ -88,23 +89,62 @@ function renderProviderFields(): void {
   const info = PROVIDER_INFO[draftProvider];
   const local = isLocalProvider(draftProvider);
   byId('key-field').hidden = local;
-  byId('local-field').hidden = !local;
-  byId('help-omp').hidden = draftProvider !== 'omp';
-  byId('help-ollama').hidden = draftProvider !== 'ollama';
-  if (isLocalProvider(draftProvider)) {
-    byId('local-label').textContent = LOCAL_LABEL[draftProvider];
-    localInput.value = settings.localUrls[draftProvider];
-    localInput.placeholder = DEFAULT_SETTINGS.localUrls[draftProvider];
-    keyInput.value = '';
-  } else {
-    keyInput.value = secrets[draftProvider] ?? '';
-  }
+  byId('omp-field').hidden = draftProvider !== 'omp';
+  byId('ollama-field').hidden = draftProvider !== 'ollama';
+  keyInput.value = local ? '' : (secrets[draftProvider as keyof Secrets] ?? '');
+  ollamaInput.value = settings.ollamaUrl;
+  ollamaInput.placeholder = DEFAULT_SETTINGS.ollamaUrl;
+  if (draftProvider === 'omp') void refreshOmpStatus();
+  else stopOmpPolling();
   const link = byId<HTMLAnchorElement>('key-link');
   link.hidden = !info.keyUrl;
   if (info.keyUrl) link.href = info.keyUrl;
   modelInput.value = settings.models[draftProvider];
   byId('model-list').replaceChildren();
   showResult('', 'muted');
+}
+
+// Oh My Pi helper: Chrome starts it on demand once installed; until then show the install command.
+const OMP_POLL_MS = 4000;
+let ompPoll: ReturnType<typeof setTimeout> | undefined;
+let ompCheck = 0;
+
+function stopOmpPolling(): void {
+  clearTimeout(ompPoll);
+  ompCheck++;
+}
+
+function setOmpStatus(text: string, tone: 'success' | 'error' | 'muted'): void {
+  const status = byId('omp-status');
+  status.textContent = text;
+  status.className = `result ${tone}`;
+}
+
+async function refreshOmpStatus(): Promise<void> {
+  stopOmpPolling();
+  const check = ompCheck;
+  if (!byId('omp-status').textContent) setOmpStatus('Đang kiểm tra trợ lý…', 'muted');
+  try {
+    const version = await checkOmpHelper();
+    if (check !== ompCheck) return;
+    setOmpStatus(
+      `✓ Trợ lý đã sẵn sàng (Oh My Pi ${version}). Chrome tự bật trợ lý khi dịch, không cần mở Terminal.`,
+      'success',
+    );
+    byId('omp-install').hidden = true;
+  } catch (error) {
+    if (check !== ompCheck) return;
+    const { code, message } = toProviderError(error);
+    setOmpStatus(
+      code === 'helper-missing'
+        ? `✗ Chưa cài trợ lý Oh My Pi trên máy này (hoặc trợ lý chưa chạy được Oh My Pi).\nChi tiết: ${message}`
+        : describeError(error),
+      'error',
+    );
+    byId('omp-install').hidden = false;
+    // Turns green by itself once the install command has been run.
+    ompPoll = setTimeout(() => void refreshOmpStatus(), OMP_POLL_MS);
+  }
 }
 
 function renderProviders(): void {
@@ -128,7 +168,7 @@ function renderProviders(): void {
   renderProviderFields();
 }
 
-/** Local servers must be plain http on this machine (that is all the manifest allows). */
+/** Ollama must be plain http on this machine (that is all the manifest allows). */
 function validLocalUrl(value: string): string | null {
   try {
     const url = new URL(value.trim());
@@ -143,19 +183,19 @@ function validLocalUrl(value: string): string | null {
 async function commitProvider(): Promise<boolean> {
   const provider = draftProvider;
   const permission = requestProviderPermission(provider);
-  const localUrl = isLocalProvider(provider) ? validLocalUrl(localInput.value) : null;
+  const ollamaUrl = provider === 'ollama' ? validLocalUrl(ollamaInput.value) : null;
   if (!(await permission)) {
     showResult('Bạn cần cho phép extension truy cập địa chỉ của nhà cung cấp để dịch.', 'error');
     return false;
   }
-  if (isLocalProvider(provider)) {
-    if (!localUrl) {
-      showResult(`Địa chỉ phải có dạng ${DEFAULT_SETTINGS.localUrls[provider]} (localhost hoặc 127.0.0.1).`, 'error');
+  if (provider === 'ollama') {
+    if (!ollamaUrl) {
+      showResult(`Địa chỉ phải có dạng ${DEFAULT_SETTINGS.ollamaUrl} (localhost hoặc 127.0.0.1).`, 'error');
       return false;
     }
-    settings.localUrls[provider] = localUrl;
-    localInput.value = localUrl;
-  } else {
+    settings.ollamaUrl = ollamaUrl;
+    ollamaInput.value = ollamaUrl;
+  } else if (!isLocalProvider(provider)) {
     await saveSecret(provider, keyInput.value);
     secrets = await loadSecrets();
     if (!secrets[provider]) {
@@ -184,6 +224,18 @@ async function withBusy(button: HTMLButtonElement, run: () => Promise<void>): Pr
 }
 
 function bindProviderActions(): void {
+  const command = ompInstallCommand(browser.runtime.id);
+  byId('omp-command').textContent = command;
+  const copyButton = byId<HTMLButtonElement>('copy-omp-command');
+  copyButton.addEventListener('click', async () => {
+    await navigator.clipboard.writeText(command);
+    copyButton.textContent = 'Đã sao chép ✓';
+    setTimeout(() => {
+      copyButton.textContent = 'Sao chép lệnh';
+    }, 2000);
+  });
+  byId('recheck-omp').addEventListener('click', () => void refreshOmpStatus());
+
   byId('toggle-key').addEventListener('click', (event) => {
     const show = keyInput.type === 'password';
     keyInput.type = show ? 'text' : 'password';

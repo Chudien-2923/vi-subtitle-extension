@@ -33,19 +33,34 @@
           <a id="key-link" href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer">Lấy API key</a>
         </div>
 
-        <div class="field" id="local-field" hidden>
-          <label for="local-url" id="local-label">Địa chỉ trên máy</label>
-          <input type="url" id="local-url" spellcheck="false" />
-          <div class="muted small help" id="help-omp" hidden>
-            Dùng các tài khoản bạn đã đăng nhập trong Oh My Pi (<code>omp login</code>), không cần API key.
-            Mở Terminal và chạy cầu nối, để cửa sổ mở trong lúc xem video:
-            <pre><code>node omp-bridge.mjs</code></pre>
-            Tải file <a id="bridge-link" href="https://github.com/Chudien-2923/vi-subtitle-extension/blob/main/bridge/omp-bridge.mjs" target="_blank" rel="noreferrer">omp-bridge.mjs</a>
-            (hoặc chạy <code>npm run omp-bridge</code> trong thư mục mã nguồn). Model dạng
+        <div class="field" id="omp-field" hidden>
+          <span class="field-title">Trợ lý Oh My Pi trên máy</span>
+          <p class="result muted" id="omp-status" role="status"></p>
+          <div id="omp-install" hidden>
+            <p class="small">
+              Cài một lần. Sau đó Chrome tự bật trợ lý mỗi khi dịch, không cần mở Terminal hay bấm khởi chạy.
+              Mở ứng dụng <strong>Terminal</strong>, dán lệnh dưới đây rồi nhấn Enter:
+            </p>
+            <pre><code id="omp-command"></code></pre>
+            <div class="actions">
+              <button type="button" class="primary" id="copy-omp-command">Sao chép lệnh</button>
+              <button type="button" id="recheck-omp">Kiểm tra lại</button>
+            </div>
+            <p class="muted small">
+              Cần Oh My Pi đã đăng nhập (<code>omp login</code>) và Node.js hoặc Bun. Hỗ trợ macOS và Linux.
+            </p>
+          </div>
+          <div class="muted small help">
+            Dùng các tài khoản bạn đã đăng nhập trong Oh My Pi, không cần API key. Model dạng
             <code>anthropic/claude-haiku-5-5</code>, <code>openai-codex/…</code> hoặc <code>@smol</code>.
             Lưu ý: gói thuê bao (Claude Pro/Max, ChatGPT…) có điều khoản riêng; dịch nhiều video sẽ dùng hạn mức của tài khoản.
           </div>
-          <div class="muted small help" id="help-ollama" hidden>
+        </div>
+
+        <div class="field" id="ollama-field" hidden>
+          <label for="ollama-url">Địa chỉ Ollama</label>
+          <input type="url" id="ollama-url" spellcheck="false" />
+          <div class="muted small help">
             Chỉ hỗ trợ localhost / 127.0.0.1. Nếu Ollama báo lỗi quyền truy cập, chạy Ollama với biến môi trường
             <code>OLLAMA_ORIGINS=chrome-extension://*</code>.
           </div>

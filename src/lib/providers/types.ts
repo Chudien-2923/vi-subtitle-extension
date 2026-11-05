@@ -28,6 +28,6 @@ export interface ClientConfig {
   provider: ProviderId;
   model: string;
   apiKey: string | undefined;
-  /** Base URL for providers running on the user's machine (omp bridge, Ollama). */
-  localUrl: string | undefined;
+  /** Base URL of the user's Ollama server. */
+  ollamaUrl: string | undefined;
 }

@@ -21,7 +21,7 @@
     "test": "vitest run",
     "icons": "node scripts/render-icons.mjs",
     "postinstall": "wxt prepare",
-    "omp-bridge": "node bridge/omp-bridge.mjs"
+    "omp-helper": "sh bridge/install.sh"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.6.5",

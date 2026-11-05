@@ -3,7 +3,7 @@ import { isRecord } from '../guards';
 
 export const PROVIDER_IDS = ['gemini', 'openai', 'anthropic', 'openrouter', 'omp', 'ollama'] as const;
 export type ProviderId = (typeof PROVIDER_IDS)[number];
-/** Providers running on the user's machine: configured by URL, no API key. */
+/** Providers running on the user's machine: no API key. */
 export const LOCAL_PROVIDER_IDS = ['omp', 'ollama'] as const;
 export type LocalProviderId = (typeof LOCAL_PROVIDER_IDS)[number];
 export type KeyedProviderId = Exclude<ProviderId, LocalProviderId>;
@@ -34,7 +34,7 @@ export interface Settings {
   bilingual: boolean;
   provider: ProviderId;
   models: Record<ProviderId, string>;
-  localUrls: Record<LocalProviderId, string>;
+  ollamaUrl: string;
   reviewPass: boolean;
   concurrency: number;
   appearance: Appearance;
@@ -54,10 +54,7 @@ export const DEFAULT_SETTINGS: Settings = {
     omp: '@smol',
     ollama: 'qwen3:8b',
   },
-  localUrls: {
-    omp: 'http://127.0.0.1:11435',
-    ollama: 'http://localhost:11434',
-  },
+  ollamaUrl: 'http://localhost:11434',
   reviewPass: false,
   concurrency: 2,
   appearance: {

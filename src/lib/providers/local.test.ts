@@ -16,7 +16,7 @@ const request = { system: '', user: '', schema: { type: 'object' as const }, sch
 
 describe('asLocalClient', () => {
   it('turns "nothing listening" into a fatal, actionable local-offline error', async () => {
-    const client = asLocalClient(failing(new ProviderError('network', 'Failed to fetch')), 'Oh My Pi bridge');
+    const client = asLocalClient(failing(new ProviderError('network', 'Failed to fetch')), 'Ollama');
     await expect(client.complete(request)).rejects.toMatchObject({ code: 'local-offline' });
     await expect(client.listModels()).rejects.toMatchObject({ code: 'local-offline' });
     expect(IS_FATAL['local-offline']).toBe(true);

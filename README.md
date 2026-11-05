@@ -51,14 +51,14 @@ Gói miễn phí có giới hạn số yêu cầu mỗi phút/ngày. Khi bị gi
 
 ## Nhà cung cấp hỗ trợ
 
-| Nhà cung cấp     | Cần                                           | Model mặc định            |
-| ---------------- | --------------------------------------------- | ------------------------- |
-| Google Gemini    | API key                                       | `gemini-3.8-flash`        |
-| OpenAI           | API key                                       | `gpt-5-mini`              |
-| Anthropic Claude | API key                                       | `claude-haiku-5-5`        |
-| OpenRouter       | API key                                       | `google/gemini-3.8-flash` |
-| Oh My Pi         | Oh My Pi đã đăng nhập + cầu nối chạy trên máy | `@smol`                   |
-| Ollama           | Ollama chạy ở `localhost`                     | `qwen3:8b`                |
+| Nhà cung cấp     | Cần                                        | Model mặc định            |
+| ---------------- | ------------------------------------------ | ------------------------- |
+| Google Gemini    | API key                                    | `gemini-3.8-flash`        |
+| OpenAI           | API key                                    | `gpt-5-mini`              |
+| Anthropic Claude | API key                                    | `claude-haiku-5-5`        |
+| OpenRouter       | API key                                    | `google/gemini-3.8-flash` |
+| Oh My Pi         | Oh My Pi đã đăng nhập + trợ lý cài một lần | `@smol`                   |
+| Ollama           | Ollama chạy ở `localhost`                  | `qwen3:8b`                |
 
 Tên model thay đổi theo thời gian: dùng nút **Tải danh sách model** trong Cài đặt để chọn model đang có trong tài khoản của bạn.
 
@@ -66,19 +66,21 @@ Tên model thay đổi theo thời gian: dùng nút **Tải danh sách model** t
 
 ### Dùng tài khoản Oh My Pi (không cần API key)
 
-Nếu bạn dùng [Oh My Pi](https://omp.sh) và đã đăng nhập các tài khoản (`omp login`: Claude, ChatGPT/Codex, Cursor…), extension có thể dịch bằng chính các tài khoản đó qua một **cầu nối chạy trên máy**:
+Nếu bạn dùng [Oh My Pi](https://omp.sh) và đã đăng nhập các tài khoản (`omp login`: Claude, ChatGPT/Codex, Cursor…), extension có thể dịch bằng chính các tài khoản đó qua một **trợ lý nhỏ trên máy**. Chỉ cần cài một lần; sau đó Chrome tự bật trợ lý mỗi khi dịch (Chrome Native Messaging), không phải mở Terminal hay nhớ lệnh.
 
-1. Tải [`bridge/omp-bridge.mjs`](bridge/omp-bridge.mjs) (hoặc dùng thư mục mã nguồn).
-2. Mở Terminal, chạy và để cửa sổ mở trong lúc xem video:
+1. Trong Cài đặt, chọn **Oh My Pi**. Nếu chưa cài trợ lý, trang sẽ hiện lệnh cài kèm nút **Sao chép lệnh**.
+2. Mở ứng dụng Terminal, dán lệnh rồi nhấn Enter. Lệnh có dạng:
 
    ```bash
-   node omp-bridge.mjs        # hoặc: npm run omp-bridge
+   curl -fsSL https://raw.githubusercontent.com/Chudien-2923/vi-subtitle-extension/main/bridge/install.sh | sh
    ```
 
-   Cầu nối nghe ở `http://127.0.0.1:11435` (đổi bằng `CHUDIN_BRIDGE_PORT`) và chuyển yêu cầu cho `omp auth-gateway stdio`.
-3. Trong Cài đặt: chọn **Oh My Pi**, bấm **Lưu**, **Tải danh sách model** rồi chọn model (ví dụ `anthropic/claude-haiku-5-5`, hoặc `@smol` = model nhanh trong Oh My Pi của bạn), bấm **Kiểm tra kết nối**.
+   (từ thư mục mã nguồn: `npm run omp-helper`). Cần Node.js hoặc Bun; hỗ trợ macOS và Linux (Chrome, Chromium, Brave, Edge, Vivaldi, Arc).
+3. Quay lại Cài đặt: trạng thái tự chuyển sang **✓ Trợ lý đã sẵn sàng**. Bấm **Lưu**, **Tải danh sách model** rồi chọn model (ví dụ `anthropic/claude-haiku-5-5`, hoặc `@smol` = model nhanh trong Oh My Pi của bạn), bấm **Kiểm tra kết nối**.
 
-Cầu nối chỉ chấp nhận yêu cầu từ extension trình duyệt (trang web không dùng ké được tài khoản của bạn) và không lưu gì. Lưu ý: gói thuê bao (Claude Pro/Max, ChatGPT…) có điều khoản sử dụng riêng; dịch nhiều video sẽ dùng hạn mức của tài khoản — bạn tự chịu trách nhiệm khi dùng cách này.
+Trợ lý ([`bridge/omp-host.mjs`](bridge/omp-host.mjs)) được cài vào `~/.chudin-vi-subtitle/` và chuyển yêu cầu cho `omp auth-gateway stdio`. Chỉ extension này mới khởi động được nó (Chrome kiểm tra ID extension); trang web không dùng ké được tài khoản của bạn. Gỡ cài: `curl -fsSL https://raw.githubusercontent.com/Chudien-2923/vi-subtitle-extension/main/bridge/install.sh | sh -s -- uninstall`.
+
+Lưu ý: gói thuê bao (Claude Pro/Max, ChatGPT…) có điều khoản sử dụng riêng; dịch nhiều video sẽ dùng hạn mức của tài khoản — bạn tự chịu trách nhiệm khi dùng cách này.
 
 ## Sử dụng
 
@@ -91,7 +93,7 @@ Cầu nối chỉ chấp nhận yêu cầu từ extension trình duyệt (trang 
 - Không có máy chủ riêng, không thu thập dữ liệu, không theo dõi.
 - API key chỉ lưu trong bộ nhớ của extension trên máy bạn (`chrome.storage.local`), chỉ trang Cài đặt và background worker đọc được.
 - Thứ duy nhất gửi ra ngoài: nội dung phụ đề tiếng Anh, tên video và tên kênh, gửi thẳng tới nhà cung cấp AI bạn chọn.
-- Quyền extension: `storage`; quyền truy cập máy chủ của nhà cung cấp chỉ được xin khi bạn bấm Lưu.
+- Quyền extension: `storage`, `nativeMessaging` (chỉ để nói chuyện với trợ lý Oh My Pi nếu bạn cài); quyền truy cập máy chủ của nhà cung cấp chỉ được xin khi bạn bấm Lưu.
 
 ## Giới hạn hiện tại
 
