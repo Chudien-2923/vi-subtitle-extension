@@ -133,12 +133,12 @@ export default defineContentScript({
      * 1. reuse a response the player already fetched, 2. fetch the track URL
      * directly, 3. make the player load captions and reuse its request/token.
      */
-    const loadJson3 = async (videoId: string, track: YtCaptionTrack): Promise<Json3 | null> => {
+    const loadJson3 = async (videoId: string, track: YtCaptionTrack): Promise<{ json3: Json3; via: string } | null> => {
       const early = parsedCapture(videoId, track);
-      if (early) return early;
+      if (early) return { json3: early, via: 'player response (already loaded)' };
 
       const direct = await fetchJson3(new URL(track.baseUrl, location.origin));
-      if (direct) return direct;
+      if (direct) return { json3: direct, via: 'direct fetch' };
 
       const player = getPlayer();
       if (!captured.some((c) => isCaptureOf(c, videoId)) && player?.setOption) {
@@ -151,7 +151,7 @@ export default defineContentScript({
         await waitForCapture(videoId, 8000);
       }
       const exact = parsedCapture(videoId, track);
-      if (exact) return exact;
+      if (exact) return { json3: exact, via: 'player response (captions enabled by extension)' };
 
       const sample = captured.find((c) => isCaptureOf(c, videoId));
       if (!sample) return null;
@@ -159,7 +159,8 @@ export default defineContentScript({
       for (const [key, value] of sample.url.searchParams) {
         if (!url.searchParams.has(key) && !TRACK_PARAMS.includes(key)) url.searchParams.set(key, value);
       }
-      return fetchJson3(url);
+      const tokenized = await fetchJson3(url);
+      return tokenized ? { json3: tokenized, via: 'fetch with player token' } : null;
     };
 
     const send = (message: MainToIsolated) => postBridge('isolated', message);
@@ -170,10 +171,23 @@ export default defineContentScript({
       if (!info) return fail('fetch-failed');
       const track = pickEnglishTrack(info.tracks);
       if (!track) return fail('no-captions');
-      const json3 = await loadJson3(videoId, track);
-      if (!json3) return fail('fetch-failed');
+      const loaded = await loadJson3(videoId, track);
+      // One diagnostic line per video: which caption strategy worked (CLAUDE.md FR-2.4).
+      if (!loaded) {
+        console.warn(`[CHUDIN VI] ${videoId}: could not load captions ${track.vssId}`);
+        return fail('fetch-failed');
+      }
+      console.info(`[CHUDIN VI] ${videoId}: captions ${track.vssId} via ${loaded.via}`);
       const { baseUrl: _baseUrl, ...trackInfo } = track;
-      send({ kind: 'captions', requestId, videoId, title: info.title, author: info.author, track: trackInfo, json3 });
+      send({
+        kind: 'captions',
+        requestId,
+        videoId,
+        title: info.title,
+        author: info.author,
+        track: trackInfo,
+        json3: loaded.json3,
+      });
     };
 
     window.addEventListener('message', (event) => {
