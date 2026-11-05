@@ -36,10 +36,11 @@
 
 ### 0.2 Lịch sử version
 
-| Version | Ngày       | Trạng thái | Thay đổi                                                                                                                                                                      |
-| ------- | ---------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `0.0.0` | 2026-11-05 | Planning   | Khởi tạo repo, PRD, `IMPLEMENTATION_PLAN.md`. Chốt phạm vi v0.1.0, tên hiển thị **CHUDIN VI SUBTITLE**, icon (`branding/icon.svg`), phát hành chỉ qua GitHub Releases.        |
-| `0.0.0` | 2026-11-05 | Dev        | (nhắm `0.1.0`) FR-3.2/FR-4: phụ đề tự động do model tự chia câu theo chỉ số từ (giữ mốc thời gian từng từ), heuristic chỉ còn là hiển thị tạm + fallback. Code MVP Phase 1–9. |
+| Version | Ngày       | Trạng thái | Thay đổi                                                                                                                                                                              |
+| ------- | ---------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0.0.0` | 2026-11-05 | Planning   | Khởi tạo repo, PRD, `IMPLEMENTATION_PLAN.md`. Chốt phạm vi v0.1.0, tên hiển thị **CHUDIN VI SUBTITLE**, icon (`branding/icon.svg`), phát hành chỉ qua GitHub Releases.                |
+| `0.0.0` | 2026-11-05 | Dev        | (nhắm `0.1.0`) FR-3.2/FR-4: phụ đề tự động do model tự chia câu theo chỉ số từ (giữ mốc thời gian từng từ), heuristic chỉ còn là hiển thị tạm + fallback. Code MVP Phase 1–9.         |
+| `0.0.0` | 2026-11-05 | Dev        | (nhắm `0.1.0`) Thêm nhà cung cấp **Oh My Pi**: dùng tài khoản đã đăng nhập trong `omp` qua cầu nối `bridge/omp-bridge.mjs` (localhost → `omp auth-gateway stdio`), không cần API key. |
 
 ### 0.3 Roadmap version
 
@@ -80,15 +81,15 @@ Tiêu chí "dịch tốt" (đúc kết từ việc dịch 32 video Critical Thin
 
 ### 1.4 Phạm vi v0.1.0 (đã chốt 2026-11-05)
 
-| Quyết định                          | Lựa chọn                                                                                                             |
-| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Site                                | **Chỉ YouTube** (`www.youtube.com/watch`, gồm cả điều hướng SPA)                                                     |
-| Engine dịch                         | **BYOK nhiều provider**: Gemini (gợi ý mặc định, có free tier), OpenAI, Anthropic Claude, OpenRouter, Ollama (local) |
-| Video không có phụ đề EN            | **Bỏ qua**, hiển thị thông báo rõ ràng                                                                               |
-| Hiển thị mặc định                   | **Song ngữ**: VI to ở trên + EN nhỏ hiện dần theo cụm ở dưới                                                         |
-| Lượt biên tập đối chiếu (LLM lần 2) | **Tắt mặc định**, có tùy chọn bật                                                                                    |
-| Tên hiển thị                        | **CHUDIN VI SUBTITLE**                                                                                               |
-| Phát hành                           | **Chỉ GitHub Releases** (zip + Load unpacked)                                                                        |
+| Quyết định                          | Lựa chọn                                                                                                                                                                                         |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Site                                | **Chỉ YouTube** (`www.youtube.com/watch`, gồm cả điều hướng SPA)                                                                                                                                 |
+| Engine dịch                         | **Nhiều provider**: Gemini (gợi ý mặc định, có free tier), OpenAI, Anthropic Claude, OpenRouter (API key); **Oh My Pi** (tài khoản đã đăng nhập trên máy, qua cầu nối localhost); Ollama (local) |
+| Video không có phụ đề EN            | **Bỏ qua**, hiển thị thông báo rõ ràng                                                                                                                                                           |
+| Hiển thị mặc định                   | **Song ngữ**: VI to ở trên + EN nhỏ hiện dần theo cụm ở dưới                                                                                                                                     |
+| Lượt biên tập đối chiếu (LLM lần 2) | **Tắt mặc định**, có tùy chọn bật                                                                                                                                                                |
+| Tên hiển thị                        | **CHUDIN VI SUBTITLE**                                                                                                                                                                           |
+| Phát hành                           | **Chỉ GitHub Releases** (zip + Load unpacked)                                                                                                                                                    |
 
 ### 1.5 Ngoài phạm vi v0.1.0
 
@@ -140,10 +141,11 @@ Tiêu chí "dịch tốt" (đúc kết từ việc dịch 32 video Critical Thin
 
 #### FR-5 Provider (BYOK)
 
-- FR-5.1 Interface chung `TranslationProvider` cho: Gemini, OpenAI, Anthropic, OpenRouter, Ollama.
-- FR-5.2 Người dùng chọn provider, model, nhập API key (Ollama: base URL); nút "Kiểm tra kết nối".
+- FR-5.1 Interface chung `LlmClient` cho: Gemini, OpenAI, Anthropic, OpenRouter, Oh My Pi, Ollama.
+- FR-5.2 Người dùng chọn provider, model (+ tải danh sách), nhập API key; provider trên máy (Oh My Pi, Ollama) nhập địa chỉ localhost; nút "Kiểm tra kết nối".
 - FR-5.3 Gọi API từ background service worker; key không bao giờ đưa vào content script / trang YouTube.
-- FR-5.4 Lỗi chuẩn hóa: `invalid-key`, `quota`, `rate-limit` (backoff), `network`, `bad-output`.
+- FR-5.4 Lỗi chuẩn hóa: `missing-key`, `invalid-key`, `permission`, `bad-model`, `quota`, `rate-limit` (backoff), `server`, `network`, `local-offline` (provider trên máy không chạy → dừng ngay, báo bật nó), `bad-output`.
+- FR-5.5 Oh My Pi: `bridge/omp-bridge.mjs` (Node/Bun, không dependency) mở `http://127.0.0.1:11435` dạng OpenAI-compatible (`/v1/models`, `/v1/chat/completions`), chuyển tiếp qua `omp auth-gateway stdio` dùng tài khoản đã `omp login`. Chỉ phục vụ origin `chrome-extension://` (hoặc không có Origin); từ chối origin web.
 
 #### FR-6 Cache
 
@@ -228,13 +230,14 @@ Luồng: MAIN lấy json3 → ISOLATED dựng `SourceText` + overlay (tiếng An
 
 ### 1.11 Rủi ro chính
 
-| Rủi ro                                 | Ảnh hưởng             | Giảm thiểu                                                |
-| -------------------------------------- | --------------------- | --------------------------------------------------------- |
-| YouTube yêu cầu PO token cho timedtext | Không lấy được phụ đề | Intercept request của player; spike Phase 2 trước mọi thứ |
-| YouTube đổi DOM/player API             | Overlay/hook hỏng     | Gom selector một chỗ, test thủ công định kỳ               |
-| LLM trả JSON sai/thiếu cue             | Lệch phụ đề           | Validate id + retry + fallback hiển thị EN                |
-| Rate limit / quota free tier           | Dịch chậm/dừng        | Backoff, giới hạn song song, thông báo rõ                 |
-| MV3 service worker bị dừng giữa chừng  | Mất hàng đợi          | Lưu tiến độ theo chunk vào IndexedDB, resume              |
+| Rủi ro                                 | Ảnh hưởng                                                 | Giảm thiểu                                                          |
+| -------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------- |
+| YouTube yêu cầu PO token cho timedtext | Không lấy được phụ đề                                     | Intercept request của player; spike Phase 2 trước mọi thứ           |
+| YouTube đổi DOM/player API             | Overlay/hook hỏng                                         | Gom selector một chỗ, test thủ công định kỳ                         |
+| LLM trả JSON sai/thiếu cue             | Lệch phụ đề                                               | Validate id + retry + fallback hiển thị EN                          |
+| Rate limit / quota free tier           | Dịch chậm/dừng                                            | Backoff, giới hạn song song, thông báo rõ                           |
+| MV3 service worker bị dừng giữa chừng  | Mất hàng đợi                                              | Lưu tiến độ theo chunk vào IndexedDB, resume                        |
+| Dùng gói thuê bao qua Oh My Pi         | Tài khoản có thể bị giới hạn theo điều khoản nhà cung cấp | Tùy chọn, không mặc định; cảnh báo rõ trong README và trang Cài đặt |
 
 ---
 

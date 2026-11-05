@@ -1,9 +1,10 @@
 import { browser } from 'wxt/browser';
-import type { ProviderId } from '../settings/settings';
+import { isLocalProvider, type ProviderId, type Secrets, type Settings } from '../settings/settings';
 import { createAnthropicClient } from './anthropic';
 import { ProviderError } from './errors';
 import { createGeminiClient } from './gemini';
 import { PROVIDER_ORIGINS } from './hosts';
+import { asLocalClient } from './local';
 import { createOllamaClient } from './ollama';
 import { createChatCompletionsClient } from './openai-compatible';
 import type { ClientConfig, LlmClient } from './types';
@@ -13,13 +14,24 @@ export const PROVIDER_INFO: Record<ProviderId, { label: string; keyUrl: string |
   openai: { label: 'OpenAI', keyUrl: 'https://platform.openai.com/api-keys' },
   anthropic: { label: 'Anthropic Claude', keyUrl: 'https://console.anthropic.com/settings/keys' },
   openrouter: { label: 'OpenRouter', keyUrl: 'https://openrouter.ai/keys' },
-  ollama: { label: 'Ollama (chạy trên máy)', keyUrl: null },
+  omp: { label: 'Oh My Pi (tài khoản trên máy)', keyUrl: null },
+  ollama: { label: 'Ollama (model chạy trên máy)', keyUrl: null },
 };
 
 export const REPO_URL = 'https://github.com/Chudien-2923/vi-subtitle-extension';
 
+/** Bridge script users run next to Oh My Pi; see bridge/omp-bridge.mjs. */
+export const OMP_BRIDGE_URL = `${REPO_URL}/blob/main/bridge/omp-bridge.mjs`;
+
 export function createClient(config: ClientConfig): LlmClient {
-  if (config.provider === 'ollama') return createOllamaClient(config.ollamaBaseUrl, config.model);
+  const localUrl = (config.localUrl ?? '').replace(/\/+$/, '');
+  if (config.provider === 'omp') {
+    return asLocalClient(
+      createChatCompletionsClient({ baseUrl: `${localUrl}/v1`, model: config.model }),
+      'Oh My Pi bridge',
+    );
+  }
+  if (config.provider === 'ollama') return asLocalClient(createOllamaClient(localUrl, config.model), 'Ollama');
   if (!config.apiKey) throw new ProviderError('missing-key', `No API key for ${config.provider}`);
   switch (config.provider) {
     case 'gemini':
@@ -40,6 +52,16 @@ export function createClient(config: ClientConfig): LlmClient {
         extraHeaders: { 'HTTP-Referer': REPO_URL, 'X-Title': 'CHUDIN VI SUBTITLE' },
       });
   }
+}
+
+/** Client settings for `provider` (defaults to the active one) from stored settings and keys. */
+export function clientConfigFor(settings: Settings, secrets: Secrets, provider = settings.provider): ClientConfig {
+  return {
+    provider,
+    model: settings.models[provider],
+    apiKey: isLocalProvider(provider) ? undefined : secrets[provider],
+    localUrl: isLocalProvider(provider) ? settings.localUrls[provider] : undefined,
+  };
 }
 
 export function providerOrigins(provider: ProviderId): string[] {

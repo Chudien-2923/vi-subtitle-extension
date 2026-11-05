@@ -2,7 +2,7 @@ import { browser } from 'wxt/browser';
 import { statusText } from '../../lib/i18n/vi';
 import type { TabMessage, TabStatusReply } from '../../lib/messaging';
 import { PROVIDER_INFO } from '../../lib/providers';
-import { loadSecrets, loadSettings, updateSettings } from '../../lib/settings/settings';
+import { isLocalProvider, loadSecrets, loadSettings, updateSettings } from '../../lib/settings/settings';
 
 const byId = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -43,7 +43,7 @@ async function init(): Promise<void> {
   bilingual.checked = settings.bilingual;
   const provider = settings.provider;
   byId('provider').textContent = `${PROVIDER_INFO[provider].label} · ${settings.models[provider]}`;
-  byId('key-warning').hidden = provider === 'ollama' || Boolean(secrets[provider]);
+  byId('key-warning').hidden = isLocalProvider(provider) || Boolean(secrets[provider]);
 
   enabled.addEventListener('change', () => {
     void updateSettings((s) => {

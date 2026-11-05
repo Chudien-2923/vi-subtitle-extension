@@ -4,12 +4,14 @@ import type { Cue, VideoMeta } from '../../lib/captions/types';
 import { ERROR_TEXT } from '../../lib/i18n/vi';
 import { renderLine } from '../../lib/overlay/overlay';
 import { SUBTITLE_CSS, subtitleVariables } from '../../lib/overlay/style';
-import { createClient, PROVIDER_INFO, requestProviderPermission } from '../../lib/providers';
+import { clientConfigFor, createClient, PROVIDER_INFO, requestProviderPermission } from '../../lib/providers';
 import { toProviderError } from '../../lib/providers/errors';
 import type { LlmClient } from '../../lib/providers/types';
 import {
   type Appearance,
   DEFAULT_SETTINGS,
+  isLocalProvider,
+  type LocalProviderId,
   loadSecrets,
   loadSettings,
   PROVIDER_IDS,
@@ -60,7 +62,12 @@ let draftProvider: ProviderId;
 
 const keyInput = byId<HTMLInputElement>('api-key');
 const modelInput = byId<HTMLInputElement>('model');
-const ollamaInput = byId<HTMLInputElement>('ollama-url');
+const localInput = byId<HTMLInputElement>('local-url');
+
+const LOCAL_LABEL: Record<LocalProviderId, string> = {
+  omp: 'Địa chỉ cầu nối Oh My Pi',
+  ollama: 'Địa chỉ Ollama',
+};
 const providerResult = byId<HTMLParagraphElement>('provider-result');
 
 function showResult(text: string, tone: 'success' | 'error' | 'muted'): void {
@@ -79,15 +86,23 @@ function describeError(thrown: unknown): string {
 
 function renderProviderFields(): void {
   const info = PROVIDER_INFO[draftProvider];
-  const isOllama = draftProvider === 'ollama';
-  byId('key-field').hidden = isOllama;
-  byId('ollama-field').hidden = !isOllama;
-  keyInput.value = draftProvider === 'ollama' ? '' : (secrets[draftProvider] ?? '');
+  const local = isLocalProvider(draftProvider);
+  byId('key-field').hidden = local;
+  byId('local-field').hidden = !local;
+  byId('help-omp').hidden = draftProvider !== 'omp';
+  byId('help-ollama').hidden = draftProvider !== 'ollama';
+  if (isLocalProvider(draftProvider)) {
+    byId('local-label').textContent = LOCAL_LABEL[draftProvider];
+    localInput.value = settings.localUrls[draftProvider];
+    localInput.placeholder = DEFAULT_SETTINGS.localUrls[draftProvider];
+    keyInput.value = '';
+  } else {
+    keyInput.value = secrets[draftProvider] ?? '';
+  }
   const link = byId<HTMLAnchorElement>('key-link');
   link.hidden = !info.keyUrl;
   if (info.keyUrl) link.href = info.keyUrl;
   modelInput.value = settings.models[draftProvider];
-  ollamaInput.value = settings.ollamaBaseUrl;
   byId('model-list').replaceChildren();
   showResult('', 'muted');
 }
@@ -113,7 +128,8 @@ function renderProviders(): void {
   renderProviderFields();
 }
 
-function validOllamaUrl(value: string): string | null {
+/** Local servers must be plain http on this machine (that is all the manifest allows). */
+function validLocalUrl(value: string): string | null {
   try {
     const url = new URL(value.trim());
     const local = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
@@ -127,16 +143,19 @@ function validOllamaUrl(value: string): string | null {
 async function commitProvider(): Promise<boolean> {
   const provider = draftProvider;
   const permission = requestProviderPermission(provider);
-  const ollamaUrl = provider === 'ollama' ? validOllamaUrl(ollamaInput.value) : null;
+  const localUrl = isLocalProvider(provider) ? validLocalUrl(localInput.value) : null;
   if (!(await permission)) {
     showResult('Bạn cần cho phép extension truy cập địa chỉ của nhà cung cấp để dịch.', 'error');
     return false;
   }
-  if (provider === 'ollama' && !ollamaUrl) {
-    showResult('Địa chỉ Ollama phải có dạng http://localhost:11434 hoặc http://127.0.0.1:11434.', 'error');
-    return false;
-  }
-  if (provider !== 'ollama') {
+  if (isLocalProvider(provider)) {
+    if (!localUrl) {
+      showResult(`Địa chỉ phải có dạng ${DEFAULT_SETTINGS.localUrls[provider]} (localhost hoặc 127.0.0.1).`, 'error');
+      return false;
+    }
+    settings.localUrls[provider] = localUrl;
+    localInput.value = localUrl;
+  } else {
     await saveSecret(provider, keyInput.value);
     secrets = await loadSecrets();
     if (!secrets[provider]) {
@@ -147,18 +166,12 @@ async function commitProvider(): Promise<boolean> {
   settings.provider = provider;
   settings.models[provider] = modelInput.value.trim() || DEFAULT_SETTINGS.models[provider];
   modelInput.value = settings.models[provider];
-  if (ollamaUrl) settings.ollamaBaseUrl = ollamaUrl;
   await saveSettings(settings);
   return true;
 }
 
 function currentClient(): LlmClient {
-  return createClient({
-    provider: draftProvider,
-    model: settings.models[draftProvider],
-    apiKey: draftProvider === 'ollama' ? undefined : secrets[draftProvider],
-    ollamaBaseUrl: settings.ollamaBaseUrl,
-  });
+  return createClient(clientConfigFor(settings, secrets, draftProvider));
 }
 
 async function withBusy(button: HTMLButtonElement, run: () => Promise<void>): Promise<void> {

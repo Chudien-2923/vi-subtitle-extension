@@ -3,14 +3,18 @@ import { ProviderError } from './errors';
 import { requestJson } from './http';
 import type { CompletionRequest, LlmClient } from './types';
 
-/** Chat Completions API with `json_schema` output; used by OpenAI and OpenRouter. */
+/** Chat Completions API with `json_schema` output; used by OpenAI, OpenRouter and the Oh My Pi bridge. */
 export function createChatCompletionsClient(options: {
   baseUrl: string;
-  apiKey: string;
+  /** Omitted for the local Oh My Pi bridge, which uses the accounts logged in on the machine. */
+  apiKey?: string;
   model: string;
   extraHeaders?: Record<string, string>;
 }): LlmClient {
-  const headers = { authorization: `Bearer ${options.apiKey}`, ...options.extraHeaders };
+  const headers = {
+    ...(options.apiKey ? { authorization: `Bearer ${options.apiKey}` } : {}),
+    ...options.extraHeaders,
+  };
   return {
     async complete(request: CompletionRequest) {
       const data = await requestJson(`${options.baseUrl}/chat/completions`, {

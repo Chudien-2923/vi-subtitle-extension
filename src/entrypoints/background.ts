@@ -3,7 +3,7 @@ import { defineBackground } from 'wxt/utils/define-background';
 import { indexedDbCache, sessionCacheKey } from '../lib/cache/cache';
 import { isRecord } from '../lib/guards';
 import { type BackgroundToContent, type ContentToBackground, SESSION_PORT } from '../lib/messaging';
-import { createClient, hasProviderPermission } from '../lib/providers';
+import { clientConfigFor, createClient, hasProviderPermission } from '../lib/providers';
 import { ProviderError, toProviderError } from '../lib/providers/errors';
 import { loadSecrets, loadSettings } from '../lib/settings/settings';
 import { TranslationSession } from '../lib/translate/session';
@@ -19,12 +19,7 @@ async function createSession(start: StartMessage, post: (message: BackgroundToCo
   if (!(await hasProviderPermission(provider))) {
     throw new ProviderError('permission', `Missing host permission for ${provider}`);
   }
-  const client = createClient({
-    provider,
-    model,
-    apiKey: provider === 'ollama' ? undefined : secrets[provider],
-    ollamaBaseUrl: settings.ollamaBaseUrl,
-  });
+  const client = createClient(clientConfigFor(settings, secrets));
   return new TranslationSession({
     worker: createWorker({ meta: start.meta, client, reviewPass: settings.reviewPass }, start.source),
     cache: indexedDbCache,

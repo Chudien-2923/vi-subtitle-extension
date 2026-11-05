@@ -51,17 +51,34 @@ Gói miễn phí có giới hạn số yêu cầu mỗi phút/ngày. Khi bị gi
 
 ## Nhà cung cấp hỗ trợ
 
-| Nhà cung cấp     | Cần                       | Model mặc định            |
-| ---------------- | ------------------------- | ------------------------- |
-| Google Gemini    | API key                   | `gemini-3.8-flash`        |
-| OpenAI           | API key                   | `gpt-5-mini`              |
-| Anthropic Claude | API key                   | `claude-haiku-5-5`        |
-| OpenRouter       | API key                   | `google/gemini-3.8-flash` |
-| Ollama           | Ollama chạy ở `localhost` | `qwen3:8b`                |
+| Nhà cung cấp     | Cần                                           | Model mặc định            |
+| ---------------- | --------------------------------------------- | ------------------------- |
+| Google Gemini    | API key                                       | `gemini-3.8-flash`        |
+| OpenAI           | API key                                       | `gpt-5-mini`              |
+| Anthropic Claude | API key                                       | `claude-haiku-5-5`        |
+| OpenRouter       | API key                                       | `google/gemini-3.8-flash` |
+| Oh My Pi         | Oh My Pi đã đăng nhập + cầu nối chạy trên máy | `@smol`                   |
+| Ollama           | Ollama chạy ở `localhost`                     | `qwen3:8b`                |
 
 Tên model thay đổi theo thời gian: dùng nút **Tải danh sách model** trong Cài đặt để chọn model đang có trong tài khoản của bạn.
 
 **Ollama**: nếu báo lỗi quyền truy cập, chạy Ollama với biến môi trường `OLLAMA_ORIGINS=chrome-extension://*`.
+
+### Dùng tài khoản Oh My Pi (không cần API key)
+
+Nếu bạn dùng [Oh My Pi](https://omp.sh) và đã đăng nhập các tài khoản (`omp login`: Claude, ChatGPT/Codex, Cursor…), extension có thể dịch bằng chính các tài khoản đó qua một **cầu nối chạy trên máy**:
+
+1. Tải [`bridge/omp-bridge.mjs`](bridge/omp-bridge.mjs) (hoặc dùng thư mục mã nguồn).
+2. Mở Terminal, chạy và để cửa sổ mở trong lúc xem video:
+
+   ```bash
+   node omp-bridge.mjs        # hoặc: npm run omp-bridge
+   ```
+
+   Cầu nối nghe ở `http://127.0.0.1:11435` (đổi bằng `CHUDIN_BRIDGE_PORT`) và chuyển yêu cầu cho `omp auth-gateway stdio`.
+3. Trong Cài đặt: chọn **Oh My Pi**, bấm **Lưu**, **Tải danh sách model** rồi chọn model (ví dụ `anthropic/claude-haiku-5-5`, hoặc `@smol` = model nhanh trong Oh My Pi của bạn), bấm **Kiểm tra kết nối**.
+
+Cầu nối chỉ chấp nhận yêu cầu từ extension trình duyệt (trang web không dùng ké được tài khoản của bạn) và không lưu gì. Lưu ý: gói thuê bao (Claude Pro/Max, ChatGPT…) có điều khoản sử dụng riêng; dịch nhiều video sẽ dùng hạn mức của tài khoản — bạn tự chịu trách nhiệm khi dùng cách này.
 
 ## Sử dụng
 

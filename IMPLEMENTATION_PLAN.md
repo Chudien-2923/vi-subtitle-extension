@@ -116,6 +116,15 @@
 
 - [ ] "Kiểm tra kết nối" báo đúng với key hợp lệ / key sai cho từng provider có key thật để thử
 - [ ] Ollama chạy được với một model local
+- [ ] Oh My Pi: trong Chrome, "Kiểm tra kết nối" + dịch một video qua cầu nối
+
+### Oh My Pi (tài khoản trên máy, không cần API key)
+
+- [x] Cầu nối `bridge/omp-bridge.mjs` → `omp auth-gateway stdio`; `npm run omp-bridge`
+- [x] Chặn origin web (403), chỉ nhận `chrome-extension://` (smoke bằng curl)
+- [x] Provider `omp` trong extension (OpenAI-compatible, không key), địa chỉ localhost cấu hình được; `@smol` mặc định
+- [x] Provider trên máy không chạy → lỗi `local-offline` dừng ngay, thông báo rõ (unit test + smoke)
+- [x] Smoke thật ngoài Chrome: code pipeline của extension + cầu nối + `anthropic/claude-haiku-5-5` dịch trọn video TED-Ed 4,5 phút trong ~17 giây, 641/641 từ, 69/69 câu
 
 ---
 

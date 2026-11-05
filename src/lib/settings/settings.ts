@@ -1,10 +1,17 @@
 import { browser } from 'wxt/browser';
 import { isRecord } from '../guards';
 
-export const PROVIDER_IDS = ['gemini', 'openai', 'anthropic', 'openrouter', 'ollama'] as const;
+export const PROVIDER_IDS = ['gemini', 'openai', 'anthropic', 'openrouter', 'omp', 'ollama'] as const;
 export type ProviderId = (typeof PROVIDER_IDS)[number];
-export type KeyedProviderId = Exclude<ProviderId, 'ollama'>;
+/** Providers running on the user's machine: configured by URL, no API key. */
+export const LOCAL_PROVIDER_IDS = ['omp', 'ollama'] as const;
+export type LocalProviderId = (typeof LOCAL_PROVIDER_IDS)[number];
+export type KeyedProviderId = Exclude<ProviderId, LocalProviderId>;
 export const KEYED_PROVIDER_IDS: readonly KeyedProviderId[] = ['gemini', 'openai', 'anthropic', 'openrouter'];
+
+export function isLocalProvider(id: ProviderId): id is LocalProviderId {
+  return id === 'omp' || id === 'ollama';
+}
 
 /** Sizes are pixels at a 1080px-tall player; they scale with the real player height. */
 export interface Appearance {
@@ -27,7 +34,7 @@ export interface Settings {
   bilingual: boolean;
   provider: ProviderId;
   models: Record<ProviderId, string>;
-  ollamaBaseUrl: string;
+  localUrls: Record<LocalProviderId, string>;
   reviewPass: boolean;
   concurrency: number;
   appearance: Appearance;
@@ -44,9 +51,13 @@ export const DEFAULT_SETTINGS: Settings = {
     openai: 'gpt-5-mini',
     anthropic: 'claude-haiku-5-5',
     openrouter: 'google/gemini-3.8-flash',
+    omp: '@smol',
     ollama: 'qwen3:8b',
   },
-  ollamaBaseUrl: 'http://localhost:11434',
+  localUrls: {
+    omp: 'http://127.0.0.1:11435',
+    ollama: 'http://localhost:11434',
+  },
   reviewPass: false,
   concurrency: 2,
   appearance: {

@@ -20,7 +20,8 @@
     "format": "biome check --write .",
     "test": "vitest run",
     "icons": "node scripts/render-icons.mjs",
-    "postinstall": "wxt prepare"
+    "postinstall": "wxt prepare",
+    "omp-bridge": "node bridge/omp-bridge.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.6.5",

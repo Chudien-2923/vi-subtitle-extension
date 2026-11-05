@@ -33,13 +33,22 @@
           <a id="key-link" href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer">Lấy API key</a>
         </div>
 
-        <div class="field" id="ollama-field" hidden>
-          <label for="ollama-url">Địa chỉ Ollama</label>
-          <input type="url" id="ollama-url" placeholder="http://localhost:11434" />
-          <span class="muted small">
+        <div class="field" id="local-field" hidden>
+          <label for="local-url" id="local-label">Địa chỉ trên máy</label>
+          <input type="url" id="local-url" spellcheck="false" />
+          <div class="muted small help" id="help-omp" hidden>
+            Dùng các tài khoản bạn đã đăng nhập trong Oh My Pi (<code>omp login</code>), không cần API key.
+            Mở Terminal và chạy cầu nối, để cửa sổ mở trong lúc xem video:
+            <pre><code>node omp-bridge.mjs</code></pre>
+            Tải file <a id="bridge-link" href="https://github.com/Chudien-2923/vi-subtitle-extension/blob/main/bridge/omp-bridge.mjs" target="_blank" rel="noreferrer">omp-bridge.mjs</a>
+            (hoặc chạy <code>npm run omp-bridge</code> trong thư mục mã nguồn). Model dạng
+            <code>anthropic/claude-haiku-5-5</code>, <code>openai-codex/…</code> hoặc <code>@smol</code>.
+            Lưu ý: gói thuê bao (Claude Pro/Max, ChatGPT…) có điều khoản riêng; dịch nhiều video sẽ dùng hạn mức của tài khoản.
+          </div>
+          <div class="muted small help" id="help-ollama" hidden>
             Chỉ hỗ trợ localhost / 127.0.0.1. Nếu Ollama báo lỗi quyền truy cập, chạy Ollama với biến môi trường
             <code>OLLAMA_ORIGINS=chrome-extension://*</code>.
-          </span>
+          </div>
         </div>
 
         <div class="field">
