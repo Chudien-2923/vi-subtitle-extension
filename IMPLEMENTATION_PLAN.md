@@ -168,7 +168,7 @@
 
 - [x] 🧪 Gắn overlay vào `#movie_player` (Shadow DOM)
 - [x] 🧪 Ẩn phụ đề gốc YouTube khi overlay đang chạy; trả lại khi tắt (smoke happy-dom)
-- [x] VI ở trên, EN ở dưới; chưa có bản dịch → hiện EN
+- [x] VI ở trên, EN ở dưới; tắt song ngữ → không hiện tiếng Anh, kể cả khi câu chưa dịch xong (sửa theo phản hồi của chủ dự án)
 - [x] EN hiện dần theo mốc từng từ, gom cụm ≤ 7 từ / 64 ký tự, từ chưa nói giữ chỗ (ẩn) để neo ngang ổn định (unit test + smoke)
 - [x] Track không có mốc từng từ → EN hiện cả câu (không chia đều thời gian)
 - [x] 🧪 Đồng bộ `currentTime`: rAF khi đang phát + `seeked`/`timeupdate`/`pause`/`ratechange`
@@ -204,7 +204,7 @@
 
 - [x] 🧪 Ô trạng thái trên player: đang lấy phụ đề, đang dịch x%, bị giới hạn tốc độ, xong (tự ẩn), lỗi (bấm để mở Cài đặt)
 - [x] Thông báo tiếng Việt cho: chưa có key, key sai, chưa cấp quyền, model sai, hết quota, rate limit, lỗi máy chủ, mất mạng, không có phụ đề EN, không tải được phụ đề
-- [x] Output LLM lỗi sau retry → hiển thị EN cho phần đó, không cache để lần sau dịch lại
+- [x] Output LLM lỗi sau retry → phần đó không có tiếng Việt (bật song ngữ thì thấy tiếng Anh), không cache để lần sau dịch lại
 - [x] Lỗi nghiêm trọng dừng cả phiên một lần, không lặp lại thông báo (unit test)
 
 **Nghiệm thu**

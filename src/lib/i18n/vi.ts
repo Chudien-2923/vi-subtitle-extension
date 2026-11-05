@@ -32,7 +32,9 @@ export function statusText(status: SessionStatus): string {
     case 'captions-failed':
       return 'Không tải được phụ đề từ YouTube. Thử tải lại trang.';
     case 'translating':
-      return `Đang dịch ${Math.round((status.done / Math.max(1, status.total)) * 100)}%`;
+      return status.done === 0
+        ? 'Đang dịch đoạn đang xem (lần đầu mất khoảng 10–30 giây)…'
+        : `Đang dịch ${Math.round((status.done / Math.max(1, status.total)) * 100)}%`;
     case 'waiting':
       return `Bị giới hạn tốc độ, thử lại sau ${seconds(status.retryInMs)} giây (${status.done}/${status.total})`;
     case 'done':

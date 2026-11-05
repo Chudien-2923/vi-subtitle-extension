@@ -82,7 +82,7 @@ Cầu nối chỉ chấp nhận yêu cầu từ extension trình duyệt (trang 
 
 ## Sử dụng
 
-- Mở một video YouTube tiếng Anh: góc trên trái trình phát hiện trạng thái "Đang dịch…". Phụ đề tiếng Việt xuất hiện khi đoạn đang xem được dịch xong (thường vài giây); trong lúc chờ, bạn thấy tiếng Anh.
+- Mở một video YouTube tiếng Anh: góc trên trái trình phát hiện trạng thái "Đang dịch…". Phụ đề tiếng Việt xuất hiện khi đoạn đang xem được dịch xong (lần đầu khoảng 10–30 giây tùy model); nếu bật song ngữ, trong lúc chờ bạn thấy tiếng Anh.
 - Bấm icon extension để bật/tắt toàn bộ, tắt riêng video đang xem, hoặc bật/tắt song ngữ.
 - Phụ đề gốc của YouTube được ẩn khi extension đang hiển thị phụ đề.
 

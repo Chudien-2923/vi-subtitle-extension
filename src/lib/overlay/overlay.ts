@@ -192,9 +192,8 @@ export class SubtitleOverlay {
       return;
     }
     const vi = this.translations.get(cue.id) ?? null;
-    // Untranslated cues fall back to English so the viewer is never left without text.
-    const showEnglish = this.bilingual || vi === null;
-    const en = showEnglish ? englishLineAt(cue, this.phrases.get(cue.id) ?? null, timeMs) : null;
+    // English only when the viewer asked for it; untranslated cues stay blank otherwise.
+    const en = this.bilingual ? englishLineAt(cue, this.phrases.get(cue.id) ?? null, timeMs) : null;
     const key = `${cue.id}|${vi ?? ''}|${en ? `${en.words.length}:${en.visible}:${en.words[0] ?? ''}` : '-'}`;
     if (key === this.lastKey) return;
     this.lastKey = key;
