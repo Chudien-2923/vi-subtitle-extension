@@ -117,7 +117,7 @@
 - [ ] "Kiểm tra kết nối" báo đúng với key hợp lệ / key sai cho từng provider có key thật để thử
 - [ ] Ollama chạy được với một model local
 - [x] Oh My Pi: dịch video thật trong Chrome qua cầu nối HTTP cũ (chủ dự án xác nhận, video `kDq5GTckOVs`)
-- [ ] Oh My Pi qua trợ lý native messaging: cài bằng lệnh trong Cài đặt → trạng thái ✓ → dịch video, không mở Terminal
+- [x] Oh My Pi qua trợ lý native messaging: cài bằng lệnh trong Cài đặt → trạng thái ✓ → dịch video, không mở Terminal (chủ dự án xác nhận)
 
 ### Oh My Pi (tài khoản trên máy, không cần API key)
 
