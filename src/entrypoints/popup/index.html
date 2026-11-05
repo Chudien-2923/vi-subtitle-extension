@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <title>CHUDIN VI SUBTITLE</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header>
+      <img src="/icon/48.png" alt="" width="36" height="36" />
+      <div>
+        <h1>CHUDIN VI SUBTITLE</h1>
+        <span id="version" class="muted"></span>
+      </div>
+    </header>
+
+    <main>
+      <label class="row">
+        <span>Bật phụ đề tiếng Việt</span>
+        <input type="checkbox" id="enabled" class="switch" />
+      </label>
+      <label class="row" id="video-row" hidden>
+        <span>Bật cho video này</span>
+        <input type="checkbox" id="video-enabled" class="switch" />
+      </label>
+      <label class="row">
+        <span>Song ngữ (hiện tiếng Anh)</span>
+        <input type="checkbox" id="bilingual" class="switch" />
+      </label>
+
+      <p id="status" class="status"></p>
+      <p id="provider" class="muted small"></p>
+      <p id="key-warning" class="warning small" hidden>Chưa có API key. Mở Cài đặt để nhập key.</p>
+    </main>
+
+    <footer>
+      <button id="open-options" class="primary" type="button">Cài đặt</button>
+    </footer>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

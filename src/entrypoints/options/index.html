@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <title>Cài đặt · CHUDIN VI SUBTITLE</title>
+    <meta name="manifest.open_in_tab" content="true" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="page-header">
+      <img src="/icon/128.png" alt="" width="48" height="48" />
+      <div>
+        <h1>CHUDIN VI SUBTITLE</h1>
+        <p class="muted">Phụ đề tiếng Việt tự nhiên cho video YouTube tiếng Anh · <span id="version"></span></p>
+      </div>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>1. Nhà cung cấp dịch (API key của bạn)</h2>
+        <p class="muted">
+          Bản dịch do mô hình AI bạn chọn thực hiện, gọi trực tiếp bằng API key của bạn. Key chỉ lưu trên máy này.
+          Gemini có gói miễn phí, phù hợp để bắt đầu.
+        </p>
+        <div class="providers" id="providers"></div>
+
+        <div class="field" id="key-field">
+          <label for="api-key">API key</label>
+          <div class="inline">
+            <input type="password" id="api-key" autocomplete="off" spellcheck="false" placeholder="Dán API key vào đây" />
+            <button type="button" id="toggle-key">Hiện</button>
+          </div>
+          <a id="key-link" href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer">Lấy API key</a>
+        </div>
+
+        <div class="field" id="ollama-field" hidden>
+          <label for="ollama-url">Địa chỉ Ollama</label>
+          <input type="url" id="ollama-url" placeholder="http://localhost:11434" />
+          <span class="muted small">
+            Chỉ hỗ trợ localhost / 127.0.0.1. Nếu Ollama báo lỗi quyền truy cập, chạy Ollama với biến môi trường
+            <code>OLLAMA_ORIGINS=chrome-extension://*</code>.
+          </span>
+        </div>
+
+        <div class="field">
+          <label for="model">Model</label>
+          <div class="inline">
+            <input type="text" id="model" list="model-list" spellcheck="false" />
+            <datalist id="model-list"></datalist>
+            <button type="button" id="load-models">Tải danh sách model</button>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="primary" id="save-provider">Lưu</button>
+          <button type="button" id="test-provider">Kiểm tra kết nối</button>
+        </div>
+        <p id="provider-result" class="result" role="status"></p>
+      </section>
+
+      <section class="card">
+        <h2>2. Dịch</h2>
+        <label class="row">
+          <span>
+            <strong>Biên tập đối chiếu (lượt 2)</strong><br />
+            <span class="muted small">Model đọc lại bản dịch với tiếng Anh để sửa lỗi. Chất lượng cao hơn, tốn gấp đôi.</span>
+          </span>
+          <input type="checkbox" class="switch" id="review-pass" />
+        </label>
+        <label class="row">
+          <span>
+            <strong>Số yêu cầu song song</strong><br />
+            <span class="muted small">Gói miễn phí nên để 1–2 để tránh bị giới hạn tốc độ.</span>
+          </span>
+          <select id="concurrency">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+          </select>
+        </label>
+      </section>
+
+      <section class="card">
+        <h2>3. Hiển thị</h2>
+        <div class="preview" id="preview">
+          <div class="preview-video"></div>
+        </div>
+        <label class="row">
+          <span><strong>Song ngữ</strong> <span class="muted small">(hiện tiếng Anh nhỏ, chạy theo giọng đọc)</span></span>
+          <input type="checkbox" class="switch" id="bilingual" />
+        </label>
+        <div class="grid">
+          <fieldset>
+            <legend>Tiếng Việt</legend>
+            <label>Cỡ chữ <output id="viFontPx-out"></output><input type="range" id="viFontPx" min="24" max="80" step="1" /></label>
+            <label>Viền <output id="viOutlinePx-out"></output><input type="range" id="viOutlinePx" min="0" max="5" step="0.1" /></label>
+            <label class="inline-check"><input type="checkbox" id="viBold" /> Chữ đậm</label>
+            <label class="inline-check">Màu <input type="color" id="viColor" /></label>
+          </fieldset>
+          <fieldset>
+            <legend>Tiếng Anh</legend>
+            <label>Cỡ chữ <output id="enFontPx-out"></output><input type="range" id="enFontPx" min="16" max="60" step="1" /></label>
+            <label>Viền <output id="enOutlinePx-out"></output><input type="range" id="enOutlinePx" min="0" max="5" step="0.1" /></label>
+            <label class="inline-check"><input type="checkbox" id="enBold" /> Chữ đậm</label>
+            <label class="inline-check">Màu <input type="color" id="enColor" /></label>
+          </fieldset>
+          <fieldset>
+            <legend>Vị trí &amp; nền</legend>
+            <label>Cách đáy <output id="bottomPct-out"></output><input type="range" id="bottomPct" min="0" max="40" step="1" /></label>
+            <label>Nền mờ <output id="bgOpacity-out"></output><input type="range" id="bgOpacity" min="0" max="1" step="0.05" /></label>
+          </fieldset>
+        </div>
+        <p class="muted small">Cỡ chữ tính theo khung video cao 1080px và tự co giãn theo kích thước trình phát.</p>
+        <div class="actions">
+          <button type="button" id="reset-appearance">Khôi phục mặc định</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>4. Bộ nhớ đệm bản dịch</h2>
+        <p class="muted">Video đã dịch được lưu lại để xem lại không tốn thêm API.</p>
+        <p id="cache-info"></p>
+        <div class="actions">
+          <button type="button" id="clear-cache">Xóa bộ nhớ đệm</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Quyền riêng tư</h2>
+        <p class="muted">
+          Extension không có máy chủ riêng và không thu thập dữ liệu. Chỉ nội dung phụ đề tiếng Anh của video bạn
+          đang xem được gửi tới nhà cung cấp AI bạn chọn. Mã nguồn mở tại
+          <a href="https://github.com/Chudien-2923/vi-subtitle-extension" target="_blank" rel="noreferrer">GitHub</a>.
+        </p>
+      </section>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

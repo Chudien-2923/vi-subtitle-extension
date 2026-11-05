@@ -1,0 +1,50 @@
+@import "../../lib/ui/base.css";
+
+body {
+  width: 300px;
+}
+header {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--border);
+}
+header h1 {
+  font-size: 15px;
+  letter-spacing: 0.02em;
+}
+header span {
+  font-size: 12px;
+}
+main {
+  padding: 6px 16px 4px;
+}
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  cursor: pointer;
+}
+.status {
+  margin: 8px 0 4px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.status:empty {
+  display: none;
+}
+.small {
+  font-size: 12px;
+  margin: 6px 0;
+}
+footer {
+  padding: 8px 16px 14px;
+}
+footer button {
+  width: 100%;
+}
