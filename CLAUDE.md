@@ -8,18 +8,18 @@
 
 ## 0. Thông tin dự án & Version
 
-| Mục                  | Giá trị                                                        |
-| -------------------- | -------------------------------------------------------------- |
-| Tên hiển thị         | **CHUDIN VI SUBTITLE**                                         |
-| Tên repo             | `vi-subtitle-extension`                                        |
-| Icon                 | `branding/icon.svg` (nguồn) → `public/icon/{16,32,48,128}.png` |
-| Kênh phát hành       | **Chỉ GitHub Releases** (người dùng tải zip → Load unpacked)   |
-| Loại                 | Chrome Extension (Manifest V3), open source                    |
-| License              | MIT                                                            |
-| **Version hiện tại** | **`0.0.0`**                                                    |
+| Mục                  | Giá trị                                                                          |
+| -------------------- | -------------------------------------------------------------------------------- |
+| Tên hiển thị         | **CHUDIN VI SUBTITLE**                                                           |
+| Tên repo             | `vi-subtitle-extension`                                                          |
+| Icon                 | `branding/icon.svg` (nguồn) → `public/icon/{16,32,48,128}.png`                   |
+| Kênh phát hành       | **Chỉ GitHub Releases** (người dùng tải zip → Load unpacked)                     |
+| Loại                 | Chrome Extension (Manifest V3), open source                                      |
+| License              | MIT                                                                              |
+| **Version hiện tại** | **`0.0.0`**                                                                      |
 | Trạng thái           | 🚧 Đang phát triển — code MVP xong, chờ kiểm thử thật trên Chrome (Phase 2 & 10) |
-| Mốc kế tiếp          | `0.1.0` — MVP YouTube                                          |
-| Cập nhật lần cuối    | 2026-11-05                                                     |
+| Mốc kế tiếp          | `0.1.0` — MVP YouTube                                                            |
+| Cập nhật lần cuối    | 2026-11-05                                                                       |
 
 ### 0.1 Quy tắc quản lý version
 
@@ -36,9 +36,9 @@
 
 ### 0.2 Lịch sử version
 
-| Version | Ngày       | Trạng thái | Thay đổi                                                                                                                                                               |
-| ------- | ---------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `0.0.0` | 2026-11-05 | Planning   | Khởi tạo repo, PRD, `IMPLEMENTATION_PLAN.md`. Chốt phạm vi v0.1.0, tên hiển thị **CHUDIN VI SUBTITLE**, icon (`branding/icon.svg`), phát hành chỉ qua GitHub Releases. |
+| Version | Ngày       | Trạng thái | Thay đổi                                                                                                                                                                      |
+| ------- | ---------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0.0.0` | 2026-11-05 | Planning   | Khởi tạo repo, PRD, `IMPLEMENTATION_PLAN.md`. Chốt phạm vi v0.1.0, tên hiển thị **CHUDIN VI SUBTITLE**, icon (`branding/icon.svg`), phát hành chỉ qua GitHub Releases.        |
 | `0.0.0` | 2026-11-05 | Dev        | (nhắm `0.1.0`) FR-3.2/FR-4: phụ đề tự động do model tự chia câu theo chỉ số từ (giữ mốc thời gian từng từ), heuristic chỉ còn là hiển thị tạm + fallback. Code MVP Phase 1–9. |
 
 ### 0.3 Roadmap version

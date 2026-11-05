@@ -51,13 +51,13 @@ Gói miễn phí có giới hạn số yêu cầu mỗi phút/ngày. Khi bị gi
 
 ## Nhà cung cấp hỗ trợ
 
-| Nhà cung cấp | Cần | Model mặc định |
-|---|---|---|
-| Google Gemini | API key | `gemini-3.8-flash` |
-| OpenAI | API key | `gpt-5-mini` |
-| Anthropic Claude | API key | `claude-haiku-5-5` |
-| OpenRouter | API key | `google/gemini-3.8-flash` |
-| Ollama | Ollama chạy ở `localhost` | `qwen3:8b` |
+| Nhà cung cấp     | Cần                       | Model mặc định            |
+| ---------------- | ------------------------- | ------------------------- |
+| Google Gemini    | API key                   | `gemini-3.8-flash`        |
+| OpenAI           | API key                   | `gpt-5-mini`              |
+| Anthropic Claude | API key                   | `claude-haiku-5-5`        |
+| OpenRouter       | API key                   | `google/gemini-3.8-flash` |
+| Ollama           | Ollama chạy ở `localhost` | `qwen3:8b`                |
 
 Tên model thay đổi theo thời gian: dùng nút **Tải danh sách model** trong Cài đặt để chọn model đang có trong tài khoản của bạn.
 

@@ -6,20 +6,20 @@
 
 ## Tổng quan tiến độ
 
-| Phase | Nội dung                                    | Trạng thái                          |
-| ----- | ------------------------------------------- | ----------------------------------- |
-| 0     | Khởi tạo repo & tài liệu                    | ✅ Xong                              |
-| 1     | Scaffold WXT + TypeScript                   | 🟡 Code xong — chờ Load unpacked     |
-| 2     | Spike: lấy phụ đề YouTube (rủi ro cao nhất) | 🟡 Code xong — chờ test Chrome       |
-| 3     | Chuẩn hóa & phân đoạn caption               | ✅ Xong                              |
-| 4     | Provider LLM (BYOK)                         | 🟡 Code xong — chờ key thật          |
-| 5     | Pipeline dịch                               | 🟡 Code xong — chờ test Chrome       |
-| 6     | Cache IndexedDB                             | 🟡 Code xong — chờ test Chrome       |
-| 7     | Overlay hiển thị song ngữ                   | 🟡 Code xong — chờ test Chrome       |
-| 8     | Popup & trang cài đặt                       | 🟡 Code xong — chờ test Chrome       |
-| 9     | Trạng thái & xử lý lỗi                      | 🟡 Code xong — chờ test Chrome       |
-| 10    | QA trên bộ video thật                       | ⬜                                   |
-| 11    | Phát hành `v0.1.0`                          | 🟡 README/CONTRIBUTING xong          |
+| Phase | Nội dung                                    | Trạng thái                       |
+| ----- | ------------------------------------------- | -------------------------------- |
+| 0     | Khởi tạo repo & tài liệu                    | ✅ Xong                          |
+| 1     | Scaffold WXT + TypeScript                   | 🟡 Code xong — chờ Load unpacked |
+| 2     | Spike: lấy phụ đề YouTube (rủi ro cao nhất) | 🟡 Code xong — chờ test Chrome   |
+| 3     | Chuẩn hóa & phân đoạn caption               | ✅ Xong                          |
+| 4     | Provider LLM (BYOK)                         | 🟡 Code xong — chờ key thật      |
+| 5     | Pipeline dịch                               | 🟡 Code xong — chờ test Chrome   |
+| 6     | Cache IndexedDB                             | 🟡 Code xong — chờ test Chrome   |
+| 7     | Overlay hiển thị song ngữ                   | 🟡 Code xong — chờ test Chrome   |
+| 8     | Popup & trang cài đặt                       | 🟡 Code xong — chờ test Chrome   |
+| 9     | Trạng thái & xử lý lỗi                      | 🟡 Code xong — chờ test Chrome   |
+| 10    | QA trên bộ video thật                       | ⬜                               |
+| 11    | Phát hành `v0.1.0`                          | 🟡 README/CONTRIBUTING xong      |
 
 ---
 
