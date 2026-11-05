@@ -33,7 +33,7 @@
 - [x] Cấu hình `git config user.name` / `user.email` và commit đầu tiên
 - [x] `LICENSE` (MIT)
 - [x] `README.md`: giới thiệu, cách tải zip từ GitHub Releases + Load unpacked, cách lấy API key Gemini free (ảnh chụp màn hình bổ sung ở Phase 11)
-- [x] `.gitignore` (node_modules, .output, .wxt, .env*, *.zip)
+- [x] `.gitignore` (node_modules, dist, .wxt, .env*, *.zip)
 - [x] Tạo repo GitHub public, push `main` — https://github.com/Chudien-2923/vi-subtitle-extension
 
 **Nghiệm thu**

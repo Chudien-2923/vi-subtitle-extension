@@ -89,7 +89,7 @@ Yêu cầu Node.js 24+.
 ```bash
 npm install
 npm run dev        # mở Chrome với extension, tự tải lại khi sửa code
-npm run build      # build vào .output/chrome-mv3
+npm run build      # build vào dist/chrome-mv3 (Load unpacked thư mục này)
 npm run zip        # đóng gói zip để phát hành
 npm test           # unit test (Vitest)
 npm run typecheck  # TypeScript

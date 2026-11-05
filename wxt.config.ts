@@ -3,6 +3,8 @@ import { PROVIDER_HOST_PERMISSIONS } from './src/lib/providers/hosts';
 
 export default defineConfig({
   srcDir: 'src',
+  // Visible folder: macOS file pickers hide dot-folders like the default `.output`.
+  outDir: 'dist',
   imports: false,
   manifest: {
     name: 'CHUDIN VI SUBTITLE',

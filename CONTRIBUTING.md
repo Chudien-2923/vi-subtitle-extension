@@ -41,5 +41,5 @@ Quy ước:
 ## Phát hành (maintainer)
 
 1. Nâng version theo quy tắc `CLAUDE.md` mục 0.1.
-2. `npm run zip` → file `.output/vi-subtitle-extension-<version>-chrome.zip`.
+2. `npm run zip` → file `dist/vi-subtitle-extension-<version>-chrome.zip`.
 3. Tạo tag `v<version>` và GitHub Release, đính kèm file zip.
