@@ -8,18 +8,18 @@
 
 ## 0. Thông tin dự án & Version
 
-| Mục                  | Giá trị                                                                          |
-| -------------------- | -------------------------------------------------------------------------------- |
-| Tên hiển thị         | **CHUDIN VI SUBTITLE**                                                           |
-| Tên repo             | `vi-subtitle-extension`                                                          |
-| Icon                 | `branding/icon.svg` (nguồn) → `public/icon/{16,32,48,128}.png`                   |
-| Kênh phát hành       | **Chỉ GitHub Releases** (người dùng tải zip → Load unpacked)                     |
-| Loại                 | Chrome Extension (Manifest V3), open source                                      |
-| License              | MIT                                                                              |
-| **Version hiện tại** | **`0.0.0`**                                                                      |
-| Trạng thái           | 🚧 Đang phát triển — code MVP xong, chờ kiểm thử thật trên Chrome (Phase 2 & 10) |
-| Mốc kế tiếp          | `0.1.0` — MVP YouTube                                                            |
-| Cập nhật lần cuối    | 2026-11-05                                                                       |
+| Mục                  | Giá trị                                                                                    |
+| -------------------- | ------------------------------------------------------------------------------------------ |
+| Tên hiển thị         | **CHUDIN VI SUBTITLE**                                                                     |
+| Tên repo             | `vi-subtitle-extension`                                                                    |
+| Icon                 | `branding/icon.svg` (nguồn) → `public/icon/{16,32,48,128}.png`                             |
+| Kênh phát hành       | **Chỉ GitHub Releases** (người dùng tải zip → Load unpacked)                               |
+| Loại                 | Chrome Extension (Manifest V3), open source                                                |
+| License              | MIT                                                                                        |
+| **Version hiện tại** | **`0.0.0`**                                                                                |
+| Trạng thái           | 🚧 Đang phát triển — chạy được trên Chrome (Oh My Pi), chờ QA Phase 10 trước khi phát hành |
+| Mốc kế tiếp          | `0.1.0` — MVP YouTube                                                                      |
+| Cập nhật lần cuối    | 2026-11-05                                                                                 |
 
 ### 0.1 Quy tắc quản lý version
 
