@@ -8,6 +8,8 @@ const byId = <T extends HTMLElement>(id: string) => document.getElementById(id) 
 
 const enabled = byId<HTMLInputElement>('enabled');
 const bilingual = byId<HTMLInputElement>('bilingual');
+const voiceEnabled = byId<HTMLInputElement>('voice-enabled');
+const voiceHint = byId<HTMLParagraphElement>('voice-hint');
 const videoRow = byId<HTMLLabelElement>('video-row');
 const videoEnabled = byId<HTMLInputElement>('video-enabled');
 const statusLine = byId<HTMLParagraphElement>('status');
@@ -53,6 +55,14 @@ async function init(): Promise<void> {
   bilingual.addEventListener('change', () => {
     void updateSettings((s) => {
       s.bilingual = bilingual.checked;
+    });
+  });
+  voiceEnabled.checked = settings.voiceover.enabled;
+  voiceHint.hidden = !voiceEnabled.checked;
+  voiceEnabled.addEventListener('change', () => {
+    voiceHint.hidden = !voiceEnabled.checked;
+    void updateSettings((s) => {
+      s.voiceover.enabled = voiceEnabled.checked;
     });
   });
   videoEnabled.addEventListener('change', async () => {

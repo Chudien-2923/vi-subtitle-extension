@@ -1,22 +1,39 @@
 #!/usr/bin/env node
-// CHUDIN VI SUBTITLE — Oh My Pi helper (Chrome native messaging host).
+// CHUDIN VI SUBTITLE — local helper (Chrome native messaging host).
 //
-// Chrome starts this program by itself whenever the extension needs it, so the
-// extension can translate with the model accounts logged into Oh My Pi
-// (`omp login`) without API keys and without a terminal window. Requests are
-// forwarded to `omp auth-gateway stdio`. Only the extension IDs listed in the
-// host manifest (`allowed_origins`) can start it; web pages cannot reach it.
+// Chrome starts this program by itself whenever the extension needs it, so no
+// terminal window is needed. Only the extension IDs listed in the host manifest
+// (`allowed_origins`) can start it; web pages cannot reach it. Two independent jobs:
+//
+//  * Oh My Pi routes (`/health`, `/v1/*`): translate with the model accounts logged
+//    into Oh My Pi (`omp login`), no API keys. Requests go to `omp auth-gateway stdio`.
+//    Optional: a missing omp only affects these routes.
+//  * Local voice routes (`/tts/*`): offline Vietnamese text-to-speech (VieNeu-TTS) run by a
+//    Python worker inside a private environment. See tts-runtime/. No network port is opened.
 //
 // Install once (macOS / Linux):  sh install.sh   (see README)
-//   node omp-host.mjs install --omp /path/to/omp [extension-id ...]
+//   node omp-host.mjs install [--omp /path/to/omp] [--tts] [--uv /path/to/uv] [extension-id ...]
+//   node omp-host.mjs provision        install the local voice (runtime + model) from a terminal
+//   node omp-host.mjs status           print the local voice status as JSON
 //   node omp-host.mjs uninstall
-
 import { spawn } from 'node:child_process';
-import { chmodSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  chmodSync,
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { homedir, platform } from 'node:os';
 import { dirname, join } from 'node:path';
 import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
+import { RUNTIME_DIR, ttsStatus } from './tts-runtime/common.mjs';
+import { provision } from './tts-runtime/provision.mjs';
+import { handleTts, isTtsPath, killTtsNow, shutdownTts } from './tts-runtime/service.mjs';
 
 const HOST_NAME = 'com.chudin.vi_subtitle';
 /** ID fixed by the `key` in the extension manifest. */
@@ -31,7 +48,9 @@ function writeMessage(message) {
   const json = Buffer.from(JSON.stringify(message), 'utf8');
   const header = Buffer.alloc(4);
   header.writeUInt32LE(json.length, 0);
-  process.stdout.write(Buffer.concat([header, json]));
+  return new Promise((resolve, reject) => {
+    process.stdout.write(Buffer.concat([header, json]), (error) => (error ? reject(error) : resolve()));
+  });
 }
 
 /** Splits a byte stream into messages; returns a feed function. */
@@ -41,10 +60,18 @@ function messageReader(onMessage) {
     buffer = Buffer.concat([buffer, chunk]);
     while (buffer.length >= 4) {
       const length = buffer.readUInt32LE(0);
+      // Chrome never sends more than 64 MiB; anything near that is a corrupt stream.
+      if (length > 8 * 1024 * 1024) process.exit(1);
       if (buffer.length < 4 + length) return;
       const body = buffer.subarray(4, 4 + length).toString('utf8');
       buffer = buffer.subarray(4 + length);
-      onMessage(JSON.parse(body));
+      let message;
+      try {
+        message = JSON.parse(body);
+      } catch {
+        continue;
+      }
+      onMessage(message);
     }
   };
 }
@@ -146,18 +173,30 @@ async function handle(message) {
   }
 }
 
+async function stop() {
+  gateway?.kill();
+  // Worker, installer and their descendants: never leave CPU-heavy children behind.
+  await shutdownTts();
+  process.exit(0);
+}
+
 function serve() {
+  process.stdout.on('error', () => process.exit(0)); // Chrome went away
+  process.on('exit', () => {
+    gateway?.kill();
+    killTtsNow();
+  });
+  for (const signal of ['SIGTERM', 'SIGINT', 'SIGHUP']) process.on(signal, () => void stop());
   process.stdin.on(
     'data',
     messageReader((message) => {
-      void handle(message).then(writeMessage);
+      // Voice and Oh My Pi are independent: either can fail without touching the other.
+      if (isTtsPath(message?.path)) void handleTts(message, writeMessage).then(writeMessage);
+      else void handle(message).then(writeMessage);
     }),
   );
   // Chrome closes stdin when the extension disconnects.
-  process.stdin.on('end', () => {
-    gateway?.kill();
-    process.exit(0);
-  });
+  process.stdin.on('end', () => void stop());
 }
 
 // ---------------------------------------------------------------------------
@@ -204,7 +243,9 @@ function install(args) {
     return index >= 0 ? args[index + 1] : undefined;
   };
   const omp = flag('--omp');
-  if (!omp) throw new Error('Missing --omp <path to omp>');
+  const tts = args.includes('--tts');
+  if (!omp && !tts) throw new Error('Missing --omp <path to omp> (or --tts for the local voice only)');
+  const uv = flag('--uv');
   // Prefer the launcher path the shell found (e.g. a Homebrew symlink) over the versioned execPath.
   const runtime = flag('--runtime') || process.execPath;
   const ids = args.filter((arg) => /^[a-p]{32}$/.test(arg));
@@ -213,16 +254,32 @@ function install(args) {
   const script = join(INSTALL_DIR, 'omp-host.mjs');
   const self = fileURLToPath(import.meta.url);
   if (self !== script) writeFileSync(script, readFileSync(self));
+  const runtimeDir = join(INSTALL_DIR, 'tts-runtime');
+  if (RUNTIME_DIR !== runtimeDir) {
+    mkdirSync(runtimeDir, { recursive: true });
+    for (const name of readdirSync(RUNTIME_DIR)) copyFileSync(join(RUNTIME_DIR, name), join(runtimeDir, name));
+  }
 
   // Chrome starts hosts with a minimal PATH, so pin absolute paths.
   const wrapper = join(INSTALL_DIR, 'omp-host');
-  const path = [...new Set([dirname(runtime), dirname(omp), '/usr/bin', '/bin', '/usr/sbin', '/sbin'])];
+  const path = [
+    ...new Set([
+      dirname(runtime),
+      ...(omp ? [dirname(omp)] : []),
+      ...(uv ? [dirname(uv)] : []),
+      '/usr/bin',
+      '/bin',
+      '/usr/sbin',
+      '/sbin',
+    ]),
+  ];
   writeFileSync(
     wrapper,
     [
       '#!/bin/sh',
-      '# Generated by the CHUDIN VI SUBTITLE installer. Chrome runs this to reach Oh My Pi.',
-      `export OMP_BIN=${quote(omp)}`,
+      '# Generated by the CHUDIN VI SUBTITLE installer. Chrome runs this to reach Oh My Pi and the local voice.',
+      ...(omp ? [`export OMP_BIN=${quote(omp)}`] : []),
+      ...(uv ? [`export CHUDIN_UV=${quote(uv)}`] : []),
       `export PATH=${quote(path.join(':'))}`,
       `exec ${quote(runtime)} ${quote(script)} "$@"`,
       '',
@@ -243,7 +300,7 @@ function install(args) {
     mkdirSync(dirname(file), { recursive: true });
     const manifest = {
       name: HOST_NAME,
-      description: 'CHUDIN VI SUBTITLE · Oh My Pi helper',
+      description: 'CHUDIN VI SUBTITLE · local helper (Oh My Pi + local voice)',
       path: wrapper,
       type: 'stdio',
       allowed_origins: [...allowed],
@@ -264,7 +321,27 @@ function uninstall() {
   rmSync(INSTALL_DIR, { recursive: true, force: true });
 }
 
+// ---------------------------------------------------------------------------
+// Command line: install / provision / status / uninstall.
+// ---------------------------------------------------------------------------
+
+async function cliProvision() {
+  const controller = new AbortController();
+  for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => controller.abort());
+  process.on('exit', killTtsNow);
+  await provision({ signal: controller.signal, onProgress: (message) => console.log(`  ${message}`) });
+}
+
 const [command, ...rest] = process.argv.slice(2);
 if (command === 'install') install(rest);
 else if (command === 'uninstall') uninstall();
+else if (command === 'provision') {
+  cliProvision().then(
+    () => console.log('✓ Đã cài giọng đọc cục bộ.'),
+    (error) => {
+      console.error(`✗ ${error instanceof Error ? error.message : error}`);
+      process.exit(1);
+    },
+  );
+} else if (command === 'status') console.log(JSON.stringify(ttsStatus(), null, 2));
 else serve(); // Chrome passes the caller origin (and on Windows a window handle) as arguments.

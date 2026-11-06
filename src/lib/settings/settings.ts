@@ -29,6 +29,17 @@ export interface Appearance {
   bgOpacity: number;
 }
 
+/** Local Vietnamese voiceover. Volumes are 0–1; `originalVolume` is what remains of the video's own sound. */
+export interface VoiceoverSettings {
+  enabled: boolean;
+  voice: string;
+  volume: number;
+  originalVolume: number;
+}
+
+export const DEFAULT_VOICE = 'Hải Đăng';
+const MAX_VOICE_LENGTH = 64;
+
 export interface Settings {
   enabled: boolean;
   bilingual: boolean;
@@ -38,6 +49,7 @@ export interface Settings {
   reviewPass: boolean;
   concurrency: number;
   appearance: Appearance;
+  voiceover: VoiceoverSettings;
 }
 
 export type Secrets = Partial<Record<KeyedProviderId, string>>;
@@ -69,10 +81,28 @@ export const DEFAULT_SETTINGS: Settings = {
     bottomPct: 7,
     bgOpacity: 0,
   },
+  voiceover: {
+    enabled: false,
+    voice: DEFAULT_VOICE,
+    volume: 1,
+    originalVolume: 0.2,
+  },
 };
 
 const SETTINGS_KEY = 'settings';
 const SECRETS_KEY = 'secrets';
+
+/** Stored voiceover values are untrusted: volumes must be finite and 0–1, the voice a short non-empty name. */
+function sanitizeVoiceover(value: VoiceoverSettings): VoiceoverSettings {
+  const unit = (v: number, fallback: number) => (Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : fallback);
+  const voice = value.voice.trim();
+  return {
+    enabled: value.enabled,
+    voice: voice && voice.length <= MAX_VOICE_LENGTH ? voice : DEFAULT_VOICE,
+    volume: unit(value.volume, DEFAULT_SETTINGS.voiceover.volume),
+    originalVolume: unit(value.originalVolume, DEFAULT_SETTINGS.voiceover.originalVolume),
+  };
+}
 
 /** Fills missing or wrongly-typed stored fields from defaults (stored data may predate new fields). */
 export function mergeSettings(stored: unknown): Settings {
@@ -92,6 +122,7 @@ export function mergeSettings(stored: unknown): Settings {
   const merged = pick(stored, DEFAULT_SETTINGS);
   if (!PROVIDER_IDS.includes(merged.provider)) merged.provider = DEFAULT_SETTINGS.provider;
   merged.concurrency = Math.min(4, Math.max(1, Math.round(merged.concurrency)));
+  merged.voiceover = sanitizeVoiceover(merged.voiceover);
   return merged;
 }
 

@@ -16,9 +16,10 @@ import {
   type TabStatusReply,
 } from '../lib/messaging';
 import { SubtitleOverlay } from '../lib/overlay/overlay';
-import { loadSettings, onSettingsChanged, type Settings } from '../lib/settings/settings';
+import { loadSettings, onSettingsChanged, type Settings, updateSettings } from '../lib/settings/settings';
 import { type ChunkPlan, planChunks } from '../lib/translate/chunks';
 import { buildDisplay, type ChunkPayload } from '../lib/translate/display';
+import { VoiceoverController } from '../lib/voiceover/controller';
 import { parseTrackInfo } from '../lib/youtube/tracks';
 
 const HEARTBEAT_MS = 10_000;
@@ -50,8 +51,13 @@ class VideoSession {
   private readonly requestId: number;
   private settings: Settings;
   private readonly reportStatus: (status: SessionStatus) => void;
+  private cacheVideo: Pick<VideoMeta, 'videoId' | 'title'> | null = null;
   private overlay: SubtitleOverlay | null = null;
   private video: HTMLVideoElement | null = null;
+  private player: HTMLElement | null = null;
+  private voiceover: VoiceoverController | null = null;
+  private playerMonitor: ReturnType<typeof setInterval> | undefined;
+  private readonly seekListener = () => this.sendPlayhead();
   private port: Port | null = null;
   private startMessage: ContentToBackground | null = null;
   private heartbeat: ReturnType<typeof setInterval> | undefined;
@@ -103,12 +109,17 @@ class VideoSession {
   updateSettings(settings: Settings): void {
     this.settings = settings;
     this.overlay?.setAppearance(settings.appearance, settings.bilingual);
+    this.voiceover?.updateSettings(settings.voiceover);
   }
 
   dispose(): void {
     this.disposed = true;
     clearInterval(this.heartbeat);
     clearTimeout(this.badgeTimer);
+    clearInterval(this.playerMonitor);
+    this.video?.removeEventListener('seeked', this.seekListener);
+    this.voiceover?.destroy();
+    this.voiceover = null;
     this.port?.disconnect();
     this.port = null;
     this.overlay?.destroy();
@@ -119,15 +130,48 @@ class VideoSession {
   private async mount(source: SourceText, meta: VideoMeta) {
     const found = await waitForPlayer(20_000);
     if (!found || this.disposed) return;
-    this.video = found.video;
     this.source = source;
+    this.cacheVideo = { videoId: meta.videoId, title: meta.title.slice(0, 1000) };
     this.plans = planChunks(source);
-    this.overlay = new SubtitleOverlay(found.player, found.video, this.settings.appearance, this.settings.bilingual);
-    this.refreshDisplay();
+    this.bindPlayer(found.player, found.video);
     this.startMessage = { kind: 'start', meta, source, playheadMs: 0 };
-    found.video.addEventListener('seeked', () => this.sendPlayhead());
+    this.playerMonitor = setInterval(() => {
+      const player = document.getElementById('movie_player');
+      const video = player?.querySelector<HTMLVideoElement>('video.html5-main-video');
+      if (player && video && (video !== this.video || player !== this.player)) this.bindPlayer(player, video);
+      else if (this.video && !this.video.isConnected) {
+        this.video.removeEventListener('seeked', this.seekListener);
+        this.voiceover?.destroy();
+        this.voiceover = null;
+        this.overlay?.destroy();
+        this.overlay = null;
+        this.video = null;
+      }
+    }, 1000);
     this.heartbeat = setInterval(() => this.sendPlayhead(), HEARTBEAT_MS);
     this.connect();
+  }
+
+  private bindPlayer(player: HTMLElement, video: HTMLVideoElement): void {
+    this.video?.removeEventListener('seeked', this.seekListener);
+    this.voiceover?.destroy();
+    this.overlay?.destroy();
+    this.player = player;
+    this.video = video;
+    this.overlay = new SubtitleOverlay(player, video, this.settings.appearance, this.settings.bilingual);
+    this.voiceover = new VoiceoverController(
+      player,
+      video,
+      this.settings.voiceover,
+      (enabled) => {
+        void updateSettings((settings) => {
+          settings.voiceover.enabled = enabled;
+        });
+      },
+      this.cacheVideo ?? { videoId: this.videoId, title: '' },
+    );
+    video.addEventListener('seeked', this.seekListener);
+    this.refreshDisplay();
   }
 
   /** Shows a short notice on the player without taking over YouTube's own captions. */
@@ -174,6 +218,7 @@ class VideoSession {
     const display = buildDisplay(this.source, this.plans, this.payloads);
     this.overlay.setCues(display.cues);
     this.overlay.addTranslations(display.translations);
+    this.voiceover?.setTimeline(display.cues, new Map(display.translations), this.finished);
   }
 
   private handlePort(message: BackgroundToContent): void {
@@ -192,9 +237,11 @@ class VideoSession {
       case 'fatal':
         this.finished = true;
         this.setStatus({ state: 'error', code: message.code, message: message.message });
+        this.refreshDisplay();
         break;
       case 'done':
         this.finished = true;
+        this.refreshDisplay();
         clearInterval(this.heartbeat);
         this.setStatus({ state: 'done', someUntranslated: message.failedUnits > 0 });
         this.port?.disconnect();
@@ -236,6 +283,13 @@ class Controller {
   async init(): Promise<void> {
     this.settings = await loadSettings();
     onSettingsChanged((settings) => this.onSettings(settings));
+    window.addEventListener('pagehide', () => {
+      this.session?.dispose();
+      this.session = null;
+    });
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted) this.restart();
+    });
     window.addEventListener('message', (event) => {
       const message = readBridge(event, 'isolated');
       if (!message) return;
@@ -246,6 +300,12 @@ class Controller {
       }
     });
     browser.runtime.onMessage.addListener((message: TabMessage, _sender, sendResponse) => {
+      if (message.kind === 'video-cache-deleted' && message.videoId === this.videoId) {
+        this.disabledVideos.add(message.videoId);
+        this.restart();
+        sendResponse({ stopped: true });
+        return false;
+      }
       if (message.kind === 'set-video-enabled' && this.videoId) {
         if (message.enabled) this.disabledVideos.delete(this.videoId);
         else this.disabledVideos.add(this.videoId);

@@ -158,6 +158,50 @@ describe('TranslationSession scheduling', () => {
     await vi.runAllTimersAsync();
     expect(peak).toBe(2);
   });
+
+  it('does not report completion until the final chunk is persisted, or recreate it after abort', async () => {
+    const persisted = new Map<string, ChunkPayload>();
+    const writing = Promise.withResolvers<void>();
+    const release = Promise.withResolvers<void>();
+    const cache: TranslationCache = {
+      getChunk: async () => undefined,
+      async putChunk(key, index, payload, signal) {
+        writing.resolve();
+        await release.promise;
+        if (!signal?.aborted) persisted.set(`${key}#${index}`, payload);
+      },
+    };
+    const first = run({ source: cueSource(1), complete: async (r) => answer(r), cache });
+    await first.session.start(0);
+    await writing.promise;
+    expect(first.log.done).toEqual([]);
+    release.resolve();
+    await vi.runAllTimersAsync();
+    expect(first.log.done).toEqual([0]);
+    expect(persisted.get('key#0')).toEqual({ mode: 'cues', translations: { c0: 'vi:line 0' } });
+    persisted.clear();
+    const secondWrite = Promise.withResolvers<void>();
+    const finish = Promise.withResolvers<void>();
+    const second = run({
+      source: cueSource(1),
+      complete: async (r) => answer(r),
+      cache: {
+        ...cache,
+        async putChunk(key, index, payload, signal) {
+          secondWrite.resolve();
+          await finish.promise;
+          if (!signal?.aborted) persisted.set(`${key}#${index}`, payload);
+        },
+      },
+    });
+    await second.session.start(0);
+    await secondWrite.promise;
+    second.session.abort();
+    finish.resolve();
+    await vi.runAllTimersAsync();
+    expect(persisted.has('key#0')).toBe(false);
+    expect(second.log.done).toEqual([]);
+  });
 });
 
 describe('TranslationSession errors', () => {

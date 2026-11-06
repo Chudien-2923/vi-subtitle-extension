@@ -1,0 +1,117 @@
+CHUDIN VI SUBTITLE - local Vietnamese voiceover: third-party notices
+====================================================================
+
+This file lists the software and model weights downloaded onto the user's machine
+when the user installs the optional local voice ("Cai/Tai giong"). Nothing here is
+bundled inside the browser extension. Everything is downloaded from its original
+publisher at a pinned version and verified by SHA-256 (see asset-manifest.json and
+requirements.lock).
+
+Models (Apache License 2.0; full text in LICENSE-APACHE-2.0.txt)
+----------------------------------------------------------------
+- VieNeu-TTS v3 Turbo (pnnbao-ump/VieNeu-TTS-v3-Turbo), revision 61b85e3d937fbbacb387714180e8182823512523
+  https://huggingface.co/pnnbao-ump/VieNeu-TTS-v3-Turbo
+- MOSS-Audio-Tokenizer-Nano-ONNX (OpenMOSS-Team/MOSS-Audio-Tokenizer-Nano-ONNX), revision ceff0d0749bfb3fa2d61149794ec6feef0d1e1ae
+  https://huggingface.co/OpenMOSS-Team/MOSS-Audio-Tokenizer-Nano-ONNX
+
+Python SDK
+----------
+- vieneu 3.8.3 (Apache-2.0), https://github.com/pnnbao97/VieNeu-TTS
+  Built-in preset voices (including the default "Hai Dang") ship inside this SDK.
+  Voice cloning is intentionally not exposed by this extension.
+
+Python dependencies (versions from requirements.lock; license as declared in each
+package's metadata on the reference machine - consult the package for the full text)
+------------------------------------------------------------------------------------
+- annotated-doc==0.0.5: MIT
+- annotated-types==0.8.0: MIT
+- anyio==4.16.0: MIT
+- audioop-lts==0.2.2: (platform-specific, not installed on the reference machine; see package metadata)
+- brotli==1.2.1: MIT
+- certifi==2026.10.23: Mozilla Public License 2.0 (MPL 2.0)
+- cffi==2.1.1: MIT-0
+- charset-normalizer==3.5.2: MIT
+- click==8.5.0: BSD-3-Clause
+- cloudpickle==3.1.2: BSD License
+- colorama==0.4.6: (platform-specific, not installed on the reference machine; see package metadata)
+- decorator==5.3.1: BSD-2-Clause
+- fastapi==0.162.0: MIT
+- filelock==4.2.9: MIT
+- flatbuffers==25.12.19: Apache Software License
+- fsspec==2026.9.0: BSD-3-Clause
+- gradio==6.31.0: Apache-2.0
+- gradio-client==2.7.2: Apache-2.0
+- groovy==0.1.2: MIT License
+- h11==0.16.0: MIT License
+- hf-gradio==0.4.1: MIT
+- hf-xet==1.8.0: Apache-2.0
+- httpcore==1.0.9: BSD-3-Clause
+- httpcore2==2.16.0: BSD-3-Clause
+- httpx==0.28.1: BSD License
+- httpx2==2.16.0: BSD-3-Clause
+- httpx2-jsfetch==1.0: (platform-specific, not installed on the reference machine; see package metadata)
+- huggingface-hub==2.4.0: Apache Software License
+- idna==3.20: BSD-3-Clause
+- jinja2==3.1.6: BSD License
+- joblib==1.6.0: BSD-3-Clause
+- kaldi-native-fbank==1.23.0: Apache-2.0
+- lazy-loader==0.6: BSD-3-Clause
+- librosa==1.0.0: ISC License (ISCL)
+- llvmlite==0.50.0: BSD-2-Clause AND Apache-2.0 WITH LLVM-exception
+- markdown-it-py==4.2.0: MIT License
+- markupsafe==3.0.4: BSD-3-Clause
+- mdurl==0.1.2: MIT License
+- msgpack==1.2.4: Apache-2.0
+- narwhals==2.28.0: MIT
+- numba==0.68.1: BSD License
+- numpy==2.5.4: BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0
+- onnxruntime==1.31.1: MIT License
+- opentelemetry-api==1.45.2: Apache-2.0
+- orjson==3.13.0: MPL-2.0 AND (Apache-2.0 OR MIT)
+- packaging==26.3: Apache-2.0 OR BSD-2-Clause
+- pandas==3.1.1: BSD-3-Clause
+- pillow==12.3.0: MIT-CMU
+- platformdirs==4.14.5: MIT
+- pooch==1.9.0: BSD-3-Clause
+- protobuf==7.36.2: 3-Clause BSD License
+- pycparser==3.12: BSD-3-Clause
+- pydantic==2.14.3: MIT
+- pydantic-core==2.50.4: MIT
+- pydub==0.25.1: MIT License
+- pygments==2.21.0: BSD-2-Clause
+- python-dateutil==4.0.0: BSD-3-Clause
+- python-multipart==0.0.33: Apache-2.0
+- pytz==2026.6: MIT License
+- pyyaml==6.0.3: MIT License
+- requests==2.34.2: Apache Software License
+- rich==15.0.0: MIT License
+- safehttpx==0.1.7: MIT License
+- scikit-learn==1.9.1: BSD-3-Clause
+- scipy==1.18.1: BSD License
+- sea-g2p==0.10.0: Apache Software License
+- semantic-version==2.10.0: BSD License
+- shellingham==1.5.4: ISC License (ISCL)
+- soundfile==0.14.0: BSD License
+- soxr==1.1.0: LGPL-2.1-or-later
+- starlette==1.10.0: BSD-3-Clause
+- threadpoolctl==3.8.0: BSD-3-Clause
+- tokenizers==0.23.3: Apache Software License
+- tomlkit==0.14.0: MIT License
+- tqdm==4.70.1: MPL-2.0 AND MIT
+- truststore==0.10.5: MIT
+- typer==0.28.0: MIT
+- typing-extensions==4.16.0: PSF-2.0
+- typing-inspection==0.4.5: MIT
+- tzdata==2026.6: Apache-2.0
+- urllib3==2.8.0: MIT
+- uvicorn==0.54.0: BSD-3-Clause
+- vieneu==3.8.3: Apache Software License
+
+Notes
+-----
+- soxr (LGPL-2.1-or-later), MPL-2.0 packages (orjson, tqdm) and the other dependencies are
+  installed unmodified, as separate pip packages in the user's private environment, so the
+  user can replace or inspect them. Their source and license texts are in each package's
+  upstream distribution (PyPI project page) and in its installed *.dist-info directory.
+- Model and SDK terms above apply to the downloaded weights and software; review them
+  before redistributing generated audio.

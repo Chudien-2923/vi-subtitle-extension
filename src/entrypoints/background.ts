@@ -1,6 +1,7 @@
 import { type Browser, browser } from 'wxt/browser';
 import { defineBackground } from 'wxt/utils/define-background';
-import { indexedDbCache, sessionCacheKey } from '../lib/cache/cache';
+import { beginVideoCacheActivity } from '../lib/cache/activity';
+import { indexedDbCache, recordCacheVideo, sessionCacheKey } from '../lib/cache/cache';
 import { isRecord } from '../lib/guards';
 import { type BackgroundToContent, type ContentToBackground, SESSION_PORT } from '../lib/messaging';
 import { clientConfigFor, createClient, hasProviderPermission } from '../lib/providers';
@@ -8,10 +9,12 @@ import { ProviderError, toProviderError } from '../lib/providers/errors';
 import { loadSecrets, loadSettings } from '../lib/settings/settings';
 import { TranslationSession } from '../lib/translate/session';
 import { createWorker } from '../lib/translate/workers';
+import { handleVoicePort } from '../lib/voiceover/service';
+import { VOICE_PORT } from '../lib/voiceover/types';
 
 type StartMessage = Extract<ContentToBackground, { kind: 'start' }>;
 
-async function createSession(start: StartMessage, post: (message: BackgroundToContent) => void) {
+async function createSession(start: StartMessage, post: (message: BackgroundToContent) => void, signal: AbortSignal) {
   const settings = await loadSettings();
   const secrets = await loadSecrets();
   const provider = settings.provider;
@@ -19,6 +22,10 @@ async function createSession(start: StartMessage, post: (message: BackgroundToCo
   if (!(await hasProviderPermission(provider))) {
     throw new ProviderError('permission', `Missing host permission for ${provider}`);
   }
+  await recordCacheVideo({ videoId: start.meta.videoId, title: start.meta.title.slice(0, 1000) }, signal).catch(
+    () => undefined,
+  );
+  if (signal.aborted) throw new ProviderError('aborted', 'Cache activity cancelled');
   const client = createClient(clientConfigFor(settings, secrets));
   return new TranslationSession({
     worker: createWorker({ meta: start.meta, client, reviewPass: settings.reviewPass }, start.source),
@@ -40,27 +47,40 @@ async function createSession(start: StartMessage, post: (message: BackgroundToCo
 function handlePort(port: Browser.runtime.Port): void {
   let session: TranslationSession | null = null;
   let disconnected = false;
+  let started = false;
+  const cancelled = new AbortController();
+  let activity: ReturnType<typeof beginVideoCacheActivity> | undefined;
   const post = (message: BackgroundToContent) => {
     if (!disconnected) port.postMessage(message);
   };
   port.onDisconnect.addListener(() => {
     disconnected = true;
     session?.abort();
+    cancelled.abort();
+    activity?.close();
   });
   port.onMessage.addListener((message: ContentToBackground) => {
     if (message.kind === 'playhead') {
       session?.setPlayhead(message.playheadMs);
       return;
     }
-    if (message.kind !== 'start' || session) return;
-    createSession(message, post)
+    if (message.kind !== 'start' || started) return;
+    started = true;
+    activity = beginVideoCacheActivity(message.meta.videoId);
+    const signal = AbortSignal.any([cancelled.signal, activity.signal]);
+    signal.addEventListener('abort', () => session?.abort(), { once: true });
+    createSession(message, post, signal)
       .then((created) => {
-        if (disconnected) return;
+        if (disconnected || signal.aborted) {
+          created.abort();
+          return;
+        }
         session = created;
         return created.start(message.playheadMs);
       })
       .catch((thrown: unknown) => {
         const error = toProviderError(thrown);
+        if (signal.aborted) return;
         post({ kind: 'fatal', code: error.code, message: error.message });
       });
   });
@@ -78,5 +98,6 @@ export default defineBackground(() => {
 
   browser.runtime.onConnect.addListener((port) => {
     if (port.name === SESSION_PORT) handlePort(port);
+    else if (port.name === VOICE_PORT) handleVoicePort(port);
   });
 });

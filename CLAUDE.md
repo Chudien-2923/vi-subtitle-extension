@@ -19,7 +19,7 @@
 | **Version hiện tại** | **`0.0.0`**                                                                                |
 | Trạng thái           | 🚧 Đang phát triển — chạy được trên Chrome (Oh My Pi), chờ QA Phase 10 trước khi phát hành |
 | Mốc kế tiếp          | `0.1.0` — MVP YouTube                                                                      |
-| Cập nhật lần cuối    | 2026-11-05                                                                                 |
+| Cập nhật lần cuối    | 2026-11-06                                                                                 |
 
 ### 0.1 Quy tắc quản lý version
 
@@ -42,16 +42,22 @@
 | `0.0.0` | 2026-11-05 | Dev        | (nhắm `0.1.0`) FR-3.2/FR-4: phụ đề tự động do model tự chia câu theo chỉ số từ (giữ mốc thời gian từng từ), heuristic chỉ còn là hiển thị tạm + fallback. Code MVP Phase 1–9.                                                                                                                                                                    |
 | `0.0.0` | 2026-11-05 | Dev        | (nhắm `0.1.0`) Thêm nhà cung cấp **Oh My Pi**: dùng tài khoản đã đăng nhập trong `omp` qua cầu nối `bridge/omp-bridge.mjs` (localhost → `omp auth-gateway stdio`), không cần API key.                                                                                                                                                            |
 | `0.0.0` | 2026-11-05 | Dev        | (nhắm `0.1.0`) Theo phản hồi "không ai nhớ lệnh chạy cầu nối": thay cầu nối HTTP bằng **trợ lý native messaging** (`bridge/omp-host.mjs`, cài một lần bằng `bridge/install.sh`, Chrome tự khởi động). Thêm `key` vào manifest để cố định ID extension `keljgahambkoccggkjpmklhomjnlagph`. Tắt song ngữ → không hiện EN kể cả khi chưa dịch xong. |
+| `0.0.0` | 2026-11-06 | Planning   | Đề xuất nhắm `0.2.0`: giọng đọc phụ đề VI tự nhiên, TTS local không API key, giảm âm gốc khi đọc, bám tốc độ video (đặc biệt 1,5×). Ưu tiên khảo sát VieNeu-TTS v3 Turbo; chưa triển khai, chưa duyệt chất giọng. Kế hoạch và các cổng nghiệm thu ở `IMPLEMENTATION_PLAN.md`.                                                                    |
+| `0.0.0` | 2026-11-06 | Planning   | Chủ dự án duyệt kế hoạch giọng đọc VI local và bắt đầu bước A (thử giọng/đo máy). Giữ cổng duyệt chất giọng trước khi tích hợp; chưa phát hành tính năng.                                                                                                                                                                                        |
+| `0.0.0` | 2026-11-06 | Dev        | (nhắm `0.2.0`) Chủ dự án chọn **Hải Đăng**. Tích hợp TTS local VieNeu 3.8.3 qua native port riêng, worker ONNX, installer/model hash-locked, audio cache giới hạn, player/popup/options, duck âm gốc và theo playbackRate. Smoke native + worker thực và regression tự động; chờ chủ dự án nghiệm thu phát/âm lượng/đồng bộ trong Chrome.        |
+| `0.0.0` | 2026-11-06 | Dev        | Sửa race `audio.play()` bị `pause()` ngắt: chỉ attempt phát hiện tại được báo lỗi, pause/buffering/seek vô hiệu promise cũ; lỗi autoplay thực vẫn được báo. Cho TTS chuẩn bị khi pause, hiển thị số câu sẵn sàng trong cửa sổ giới hạn, không tự resume video.                                                                                   |
+| `0.0.0` | 2026-11-06 | Dev        | Theo phản hồi cache: tăng lookahead giọng lên **12 câu/60 giây**; quản lý cache theo video (tiêu đề, dung lượng, xóa riêng), liên kết audio dùng chung, migration giữ cache cũ/chưa gắn video. Xóa hủy producer đúng video và chặn ghi muộn; cache video khác không bị xóa.                                                                      |
+| `0.0.0` | 2026-11-06 | Dev        | Chủ dự án phản hồi “tạm ổn”, yêu cầu commit và công khai mã nguồn giọng Hải Đăng + cache theo video lên GitHub. Giữ version `0.0.0`; chưa tag/release, các mục QA dài hạn trong `IMPLEMENTATION_PLAN.md` vẫn mở.                                                                                                                                 |
 
 ### 0.3 Roadmap version
 
-| Version | Mục tiêu                                                                                  |
-| ------- | ----------------------------------------------------------------------------------------- |
-| `0.1.0` | MVP: YouTube, phụ đề VI dịch bằng LLM (BYOK), song ngữ EN hiện dần, cache, trang cài đặt. |
-| `0.2.0` | Bảng thuật ngữ / style theo chủ đề do người dùng tự định nghĩa; xuất SRT.                 |
-| `0.3.0` | Video không có phụ đề: nhận dạng giọng nói (ASR) qua API.                                 |
-| `0.4.0` | Mở rộng site ngoài YouTube (HTML5 `<track>`, Udemy, Coursera).                            |
-| `1.0.0` | Bản ổn định, phát hành trên GitHub Releases.                                              |
+| Version | Mục tiêu                                                                                                                     |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `0.1.0` | MVP: YouTube, phụ đề VI dịch bằng LLM (BYOK), song ngữ EN hiện dần, cache, trang cài đặt.                                    |
+| `0.2.0` | Giọng đọc VI local không API key (Hải Đăng đã duyệt, code xong chờ QA Chrome); bảng thuật ngữ / style theo chủ đề; xuất SRT. |
+| `0.3.0` | Video không có phụ đề: nhận dạng giọng nói (ASR) qua API.                                                                    |
+| `0.4.0` | Mở rộng site ngoài YouTube (HTML5 `<track>`, Udemy, Coursera).                                                               |
+| `1.0.0` | Bản ổn định, phát hành trên GitHub Releases.                                                                                 |
 
 ---
 
@@ -98,7 +104,7 @@ Tiêu chí "dịch tốt" (đúc kết từ việc dịch 32 video Critical Thin
 - ASR (Whisper…) cho video không có phụ đề.
 - Backend/server riêng, tài khoản người dùng, thu phí.
 - Dịch sang ngôn ngữ khác ngoài tiếng Việt.
-- Lồng tiếng (TTS).
+- Lồng tiếng (TTS): giữ ngoài MVP `0.1.0`; kế hoạch nâng cấp đề xuất cho `0.2.0` ở FR-9.
 - Phát hành trên Chrome Web Store (chỉ dùng GitHub Releases).
 
 ### 1.6 User stories
@@ -152,7 +158,9 @@ Tiêu chí "dịch tốt" (đúc kết từ việc dịch 32 video Critical Thin
 
 - FR-6.1 Lưu bản dịch trong IndexedDB theo khóa `videoId + trackId + provider + model + styleVersion`.
 - FR-6.2 Cache theo từng chunk → dịch dở dang vẫn tiếp tục được.
-- FR-6.3 Trang cài đặt hiển thị dung lượng cache, nút xóa cache.
+- FR-6.3 Cài đặt hiển thị danh sách video, link/tiêu đề/mã, số đoạn và dung lượng ước tính của bản dịch/giọng, dùng gần nhất, nút **Xóa video này** có xác nhận. Xóa mọi track/provider/model của đúng video; không xóa video khác hoặc model TTS. Audio dùng chung chỉ xóa khi hết chủ sở hữu.
+- FR-6.4 Migration IndexedDB v1→v2 không xóa dữ liệu; bản dịch được index theo videoId chính xác, title catalog; audio có owners + cờ unassigned bảo vệ chủ cũ chưa biết. Nhóm cache cũ/nghe thử và thao tác xóa chỉ unowned riêng biệt. Audio cache hit gắn thêm video.
+- FR-6.5 Khi xóa video, hủy producer đang chạy của video đó và signal chặn transaction ghi muộn. Tab video tương ứng dừng extension đến khi chủ động bật lại/tải lại; video khác tiếp tục. Chỉ báo dịch hoàn tất sau khi giao dịch cache cuối đã settle để việc đóng port không mất chunk cuối.
 
 #### FR-7 Hiển thị (overlay)
 
@@ -176,6 +184,16 @@ Tiêu chí "dịch tốt" (đúc kết từ việc dịch 32 video Critical Thin
 | Viền đen                        | vừa             | dày hơn bản đầu (tương đương 1.6 ở ASS) |
 
 > Phản hồi người dùng: chữ EN quá nhỏ/mỏng sẽ khó đọc → không ép tỉ lệ 1/2 cứng.
+
+#### FR-9 Giọng đọc tiếng Việt — code nhắm `0.2.0`, chờ QA Chrome
+
+- FR-9.1 Đọc bản dịch VI bằng giọng tự nhiên, có ngắt nghỉ/ngữ điệu; không yêu cầu API key TTS hay tài khoản dịch vụ giọng đọc. Ưu tiên engine local; độc lập provider dịch và không bắt buộc cài Oh My Pi.
+- FR-9.2 VieNeu-TTS v3 Turbo, SDK 3.8.3, model/codec revision + SHA-256 cố định, ONNX/CPU fp32; giọng mặc định **Hải Đăng** do chủ dự án nghe chọn. Không dùng v4 API độc quyền, không clone giọng người trong video. macOS Apple Silicon đã smoke; Linux/Intel macOS chưa nghiệm thu.
+- FR-9.3 Bật/tắt giọng đọc độc lập song ngữ; chọn giọng, nghe thử, chỉnh âm lượng giọng và mức âm gốc còn lại. Mặc định giọng đọc tắt; âm gốc khi đọc = 20% mức người dùng chọn, fade 120 ms; khôi phục khi hết giọng, tắt tính năng hoặc lỗi. Tôn trọng thao tác volume/mute mới của người dùng.
+- FR-9.4 Lấy `video.currentTime` làm đồng hồ; theo `playbackRate` khi đổi tốc độ, giữ cao độ. Không đọc các mẩu EN hiện dần, không đọc bản dịch lỗi/fallback tiếng Anh. Tạm dừng/tiếp tục theo pause, buffering; hủy audio cũ khi seek, đổi video/player hoặc tắt extension.
+- FR-9.5 Tạo audio trước khoảng **60 giây thời gian xem thực, tối đa 12 câu**, **kể cả khi video đang pause/buffering** nếu Đọc VI bật và không mute/ads; UI hiện số câu VI trong cửa sổ đã có audio, không gọi đó là tiến độ cả video. Dịch chạy nền không phụ thuộc pause. Một request synthesis/client, native queue có giới hạn. Audio cache DB riêng quota tương đương 128 MiB audio (base64 ~171 MiB), LRU, khóa nội dung VI + engine/model revision + voice + cấu hình synthesis; stats dùng byte payload base64, per-video tách phần dùng chung/có thể giải phóng. Đổi tốc độ video không sinh lại giọng. Loại kết quả thuộc phiên cũ khi seek.
+- FR-9.6 Dùng câu VI đã phân đoạn, đo duration và tăng tốc khớp thời lượng tối đa thêm 1,25× so với playbackRate video, giữ cao độ. Không hứa mọi câu vừa cửa sổ chỉ bằng nhân 1,5. Khi không đủ audio/thời lượng, ưu tiên đủ nội dung (tạm giữ video có báo trạng thái), phân biệt pause do scheduler/người dùng. Không âm thầm bỏ ý, đọc chồng hoặc tăng tốc vô hạn; chờ nghe kiểm chứng khi QA Chrome.
+- FR-9.7 Cài/tải model một lần bằng trợ lý, hiện tiến độ và dung lượng; Chrome tự khởi động worker khi cần, không Terminal thường trực. Sau khi tải model, TTS hoạt động offline (YouTube và provider dịch vẫn có thể cần mạng). Giữ riêng giấy phép/attribution của model và dependency; không gộp model vào license MIT của extension.
 
 ### 1.8 Yêu cầu phi chức năng (NFR)
 
@@ -221,13 +239,15 @@ src/ (WXT + TypeScript)
    ├─ providers/  # gemini, openai-compatible (OpenAI/OpenRouter/Oh My Pi), anthropic, ollama, native (trợ lý Oh My Pi), lỗi chuẩn hóa
    ├─ cache/      # IndexedDB theo chunk
    ├─ overlay/    # timeline (cue đang hiện, cụm EN), style, overlay DOM (Shadow DOM)
+   ├─ voiceover/  # controller/timeline, volume ducking, runtime/native TTS port riêng, audio cache LRU
    ├─ youtube/    # đọc player response, chọn track EN
    ├─ settings/   # schema + mặc định + storage
    ├─ i18n/       # chuỗi tiếng Việt
    └─ messaging.ts # giao thức MAIN↔ISOLATED (postMessage) và content↔background (Port)
 bridge/
-├─ install.sh                   # cài trợ lý Oh My Pi một lần (macOS/Linux): ghi host manifest cho các trình duyệt Chromium
-└─ omp-host.mjs                 # native messaging host: Chrome tự khởi động, chuyển tiếp tới `omp auth-gateway stdio`
+├─ install.sh                   # cài trợ lý, tùy chọn --tts: môi trường Python và model đã ghim, không cần omp
+├─ omp-host.mjs                 # native host: route dịch tới omp; route TTS tới worker riêng
+└─ tts-runtime/                # worker Python offline, provision/service, lock/hash model, third-party notices
 ```
 
 Luồng: MAIN lấy json3 → ISOLATED dựng `SourceText` + overlay (tiếng Anh hiện ngay) → mở Port gửi `start` → background đọc cache, dịch chunk theo thứ tự quanh playhead, gửi `chunk` payload → content dựng lại danh sách cue (`buildDisplay`) và hiển thị theo `video.currentTime`. Seek/heartbeat 10s gửi `playhead`.

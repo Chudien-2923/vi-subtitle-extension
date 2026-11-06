@@ -126,37 +126,40 @@ export class TranslationSession {
       if (this.stopped) return;
       task.attempts++;
       if (outcome.complete || task.attempts >= worker.maxAttempts) {
-        this.complete(task, outcome);
+        await this.complete(task, outcome);
       } else {
         if (!task.partial || outcome.failedUnits < task.partial.failedUnits) task.partial = outcome;
         task.state = 'pending';
       }
     } catch (thrown) {
       if (this.stopped) return;
-      this.handleError(task, toProviderError(thrown));
+      await this.handleError(task, toProviderError(thrown));
     } finally {
       this.running--;
       this.pump();
     }
   }
 
-  private complete(task: ChunkTask, outcome: ChunkOutcome | null): void {
-    task.state = 'done';
+  private async complete(task: ChunkTask, outcome: ChunkOutcome | null): Promise<void> {
     const best = outcome && task.partial && task.partial.failedUnits < outcome.failedUnits ? task.partial : outcome;
     if (best) {
       this.failedUnits += best.failedUnits;
-      this.options.events.onChunk(task.plan.index, best.payload);
+      // Keep the activity alive until persistence settles. `done` closes the port and
+      // aborts its signal; firing it earlier would discard the final cached chunk.
       if (best.complete) {
         const { cache, cacheKey } = this.options;
-        void cache.putChunk(cacheKey, task.plan.index, best.payload).catch(() => undefined);
+        await cache.putChunk(cacheKey, task.plan.index, best.payload, this.controller.signal).catch(() => undefined);
       }
+      if (this.stopped) return;
+      this.options.events.onChunk(task.plan.index, best.payload);
     } else {
       this.failedUnits += this.options.worker.unitCount(task.plan);
     }
+    task.state = 'done';
     this.reportProgress();
   }
 
-  private handleError(task: ChunkTask, error: ProviderError): void {
+  private async handleError(task: ChunkTask, error: ProviderError): Promise<void> {
     if (IS_FATAL[error.code]) {
       this.abort();
       this.options.events.onFatal(error);
@@ -164,7 +167,7 @@ export class TranslationSession {
     }
     if (error.code === 'bad-output') {
       task.attempts++;
-      if (task.attempts >= this.options.worker.maxAttempts) this.complete(task, task.partial);
+      if (task.attempts >= this.options.worker.maxAttempts) await this.complete(task, task.partial);
       else task.state = 'pending';
       return;
     }

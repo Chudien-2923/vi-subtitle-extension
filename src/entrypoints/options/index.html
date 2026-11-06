@@ -141,12 +141,121 @@
         </div>
       </section>
 
+      <section class="card" id="voice-section">
+        <h2>4. Giọng đọc tiếng Việt (chạy trên máy)</h2>
+        <p class="muted">
+          Đọc bản dịch thành tiếng ngay trên máy bạn, không cần API key và không phụ thuộc nhà cung cấp dịch ở mục 1.
+          Âm thanh gốc của video sẽ nhỏ lại khi giọng đọc đang nói.
+        </p>
+        <label class="row">
+          <span>
+            <strong>Đọc giọng tiếng Việt</strong><br />
+            <span class="muted small">Bật/tắt tại đây hoặc trong cửa sổ nhỏ của extension. Không làm dịch lại video.</span>
+          </span>
+          <input type="checkbox" class="switch" id="voice-enabled" />
+        </label>
+
+        <div class="voice-block">
+          <span class="field-title">Trạng thái giọng đọc</span>
+          <p class="result muted" id="voice-status" role="status"></p>
+          <p class="muted small">
+            Dung lượng cần có: tải khoảng <strong>609 MB</strong> mô hình cộng khoảng <strong>620 MiB</strong> thư viện
+            Python (tổng cộng khoảng 1,2 GB ổ đĩa, chỉ tải một lần). Khi đang đọc, giọng chiếm khoảng
+            <strong>1,8 GiB RAM</strong> (đo trên máy thử, phiên bản mô hình được cố định).
+          </p>
+
+          <div id="voice-install" hidden>
+            <p class="small">
+              Chỉ cần bấm nút dưới đây một lần: extension tự tải và cài giọng đọc qua trợ lý trên máy, không cần mở
+              Terminal. Đừng đóng trang này cho tới khi tải xong.
+            </p>
+            <div class="actions">
+              <button type="button" class="primary" id="install-voice">Cài / Tải giọng</button>
+              <button type="button" id="recheck-voice">Kiểm tra lại</button>
+            </div>
+            <progress id="voice-progress" hidden></progress>
+            <p class="small muted result" id="voice-progress-text" role="status"></p>
+          </div>
+
+          <div id="voice-bootstrap" hidden>
+            <p class="small">
+              Cần cài trợ lý trên máy <strong>một lần duy nhất</strong> (hoặc cập nhật trợ lý đã cũ). Mở ứng dụng
+              <strong>Terminal</strong>, dán lệnh dưới đây rồi nhấn Enter. Sau đó quay lại đây và bấm
+              <strong>Cài / Tải giọng</strong>, không cần Terminal nữa.
+            </p>
+            <pre><code id="voice-command"></code></pre>
+            <div class="actions">
+              <button type="button" class="primary" id="copy-voice-command">Sao chép lệnh</button>
+              <button type="button" id="recheck-voice-bootstrap">Kiểm tra lại</button>
+            </div>
+            <p class="muted small">Hỗ trợ macOS và Linux. Trang tự kiểm tra lại mỗi vài giây.</p>
+          </div>
+        </div>
+
+        <div class="voice-block" id="voice-controls" hidden>
+          <div class="field">
+            <label for="voice-select">Giọng đọc</label>
+            <select id="voice-select"></select>
+          </div>
+          <div class="grid">
+            <fieldset>
+              <legend>Âm lượng</legend>
+              <label>Giọng đọc <output id="voice-volume-out"></output><input type="range" id="voice-volume" min="0" max="1" step="0.05" /></label>
+              <label>Âm gốc còn lại khi giọng đọc nói <output id="voice-original-volume-out"></output><input type="range" id="voice-original-volume" min="0" max="1" step="0.05" /></label>
+            </fieldset>
+          </div>
+          <div class="actions">
+            <button type="button" class="primary" id="preview-voice">Nghe thử</button>
+          </div>
+          <audio id="voice-audio" controls preload="none" aria-describedby="voice-preview-transcript">
+            <track id="voice-preview-track" kind="captions" srclang="vi" label="Nội dung mẫu" default />
+          </audio>
+          <p id="voice-preview-transcript" class="small muted"></p>
+          <p class="result muted small" id="voice-preview-result" role="status"></p>
+        </div>
+
+        <div class="voice-block">
+          <span class="field-title">Bộ nhớ đệm giọng đọc</span>
+          <p class="muted small">Âm thanh đã tạo được lưu lại để xem lại không phải tạo lại. Tách riêng với bản dịch.</p>
+          <p id="voice-cache-info"></p>
+          <div class="actions">
+            <button type="button" id="clear-voice-cache">Xóa giọng đã lưu</button>
+          </div>
+        </div>
+      </section>
+
       <section class="card">
-        <h2>4. Bộ nhớ đệm bản dịch</h2>
+        <h2>5. Bộ nhớ đệm bản dịch</h2>
         <p class="muted">Video đã dịch được lưu lại để xem lại không tốn thêm API.</p>
         <p id="cache-info"></p>
         <div class="actions">
           <button type="button" id="clear-cache">Xóa bộ nhớ đệm</button>
+        </div>
+      </section>
+
+      <section class="card" id="video-cache-section">
+        <h2>6. Quản lý bộ nhớ đệm theo video</h2>
+        <p class="muted">
+          Xem và xóa bản dịch cùng giọng đọc đã lưu của từng video, không ảnh hưởng tới các video khác. Dung lượng là
+          ước tính theo dữ liệu đã lưu. Giọng đọc dùng chung giữa nhiều video chỉ được giữ lại cho tới khi không còn
+          video nào dùng.
+        </p>
+        <p class="muted small">
+          Khi xóa một video, nếu video đó đang mở ở tab YouTube thì việc dịch và đọc giọng của nó bị dừng cho tới khi
+          bạn chủ động bật lại hoặc tải lại trang.
+        </p>
+        <div class="actions">
+          <button type="button" id="refresh-video-caches">Làm mới danh sách</button>
+        </div>
+        <p class="result muted" id="video-cache-status" role="status"></p>
+        <ul class="video-cache-list" id="video-cache-items" aria-live="polite"></ul>
+
+        <div class="voice-block" id="unassigned-cache">
+          <span class="field-title">Cache cũ / nghe thử chưa gắn video</span>
+          <p class="muted small" id="unassigned-cache-info"></p>
+          <div class="actions">
+            <button type="button" id="clear-unassigned-cache" hidden>Xóa phần chưa gắn video</button>
+          </div>
         </div>
       </section>
 
@@ -156,6 +265,10 @@
           Extension không có máy chủ riêng và không thu thập dữ liệu. Chỉ nội dung phụ đề tiếng Anh của video bạn
           đang xem được gửi tới nhà cung cấp AI bạn chọn. Mã nguồn mở tại
           <a href="https://github.com/Chudien-2923/vi-subtitle-extension" target="_blank" rel="noreferrer">GitHub</a>.
+        </p>
+        <p class="muted">
+          Giọng đọc tiếng Việt được tạo hoàn toàn trên máy bạn: không gửi văn bản hay âm thanh đi đâu. Lần cài đầu tiên
+          mới cần mạng để tải mô hình.
         </p>
       </section>
     </main>

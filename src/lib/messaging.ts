@@ -83,7 +83,10 @@ export type SessionStatus =
   | { state: 'done'; someUntranslated: boolean }
   | { state: 'error'; code: ErrorCode; message: string };
 
-export type TabMessage = { kind: 'get-status' } | { kind: 'set-video-enabled'; enabled: boolean };
+export type TabMessage =
+  | { kind: 'get-status' }
+  | { kind: 'set-video-enabled'; enabled: boolean }
+  | { kind: 'video-cache-deleted'; videoId: string };
 
 export interface TabStatusReply {
   videoId: string | null;
